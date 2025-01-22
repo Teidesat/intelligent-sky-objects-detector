@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -o nounset -o errexit -o pipefail
 IFS=$'\n\t'
 
 
@@ -15,12 +15,12 @@ BASE_WEB_URL="https://nova.astrometry.net"
 
 DATASET_PATH="./dataset"
 if [ ! -d "$DATASET_PATH" ]; then
-    mkdir -p "$DATASET_PATH"
+    mkdir --parents "$DATASET_PATH"
 fi
 
 TEMP_DIR_PATH="./temp"
 if [ ! -d "$TEMP_DIR_PATH" ]; then
-    mkdir -p "$TEMP_DIR_PATH"
+    mkdir --parents "$TEMP_DIR_PATH"
 fi
 
 
@@ -30,23 +30,32 @@ download_entry_info() {
 
     # Check if the dataset entry already exists
     if [ -d "$DATASET_PATH/$ENTRY_ID" ] && [ -f "$DATASET_PATH/$ENTRY_ID/$ENTRY_ID.fits" ] && [ -f "$DATASET_PATH/$ENTRY_ID/$ENTRY_ID-axy.fits" ]; then
-        echo "Dataset entry $ENTRY_ID already exists, skipping"
+        echo "Dataset entry $ENTRY_ID already exists, aborting"
         return 0
     fi
 
     # Download the HTML pages
     local DATASET_ENTRY_URL="$BASE_WEB_URL/user_images/$ENTRY_ID#original"
     local DATASET_ENTRY_HTML_PATH="$TEMP_DIR_PATH/$ENTRY_ID.html"
+
     if [ -f "$DATASET_ENTRY_HTML_PATH" ]; then
-        echo "HTML page $ENTRY_ID already exists, skipping"
+        echo "HTML page $DATASET_ENTRY_HTML_PATH already exists, skipping download"
+
     else
         echo "Downloading HTML page $DATASET_ENTRY_URL"
-        wget -O "$DATASET_ENTRY_HTML_PATH" "$DATASET_ENTRY_URL" 2>/dev/null || true
+        curl --silent --fail --output "$DATASET_ENTRY_HTML_PATH" "$DATASET_ENTRY_URL" 2>/dev/null
+
+        # Check if the HTML page was downloaded
+        if [ ! -f "$DATASET_ENTRY_HTML_PATH" ]; then
+            echo "HTML page $DATASET_ENTRY_HTML_PATH could not be downloaded, aborting entry $ENTRY_ID"
+            return 0
+        fi
     fi
 
     # Check if the page is valid
-    if [ "$(wc -c <"$DATASET_ENTRY_HTML_PATH")" -eq "0" ]; then
-        echo "HTML page $ENTRY_ID is empty, aborting"
+    if [ "$(wc --chars <"$DATASET_ENTRY_HTML_PATH")" -eq "0" ]; then
+        echo "HTML page $DATASET_ENTRY_HTML_PATH is empty, aborting entry $ENTRY_ID"
+
         # Remove the HTML temp file
         rm "$DATASET_ENTRY_HTML_PATH"
         return 0
@@ -54,9 +63,11 @@ download_entry_info() {
 
     # Check if the detection job was successful
     local ERROR_MESSAGE
-    ERROR_MESSAGE=$(xidel "$DATASET_ENTRY_HTML_PATH" -e '/html/body/div[1]/div[2]/div[1]/div' 2>&1)
+    ERROR_MESSAGE=$(xidel --silent "$DATASET_ENTRY_HTML_PATH" --extract="/html/body/div[1]/div[2]/div[1]/div" 2>&1)
+
     if [ "$ERROR_MESSAGE" != "" ]; then
-        echo "Error message: $ERROR_MESSAGE"
+        echo "Error message: $ERROR_MESSAGE, aborting entry $ENTRY_ID"
+
         # Remove the HTML temp file
         rm "$DATASET_ENTRY_HTML_PATH"
         return 0
@@ -64,10 +75,12 @@ download_entry_info() {
 
     # Check if the detection job was successful
     local JOB_STATUS
-    JOB_STATUS=$(xidel "$DATASET_ENTRY_HTML_PATH" -e '/html/body/div[1]/div[2]/div[2]/div[1]/div[2]/div/div' 2>&1)
+    JOB_STATUS=$(xidel --silent "$DATASET_ENTRY_HTML_PATH" --extract="/html/body/div[1]/div[2]/div[2]/div[1]/div[2]/div/div" 2>&1)
     echo "Job status $ENTRY_ID: $JOB_STATUS"
+
     if [ "$JOB_STATUS" != "Success" ]; then
         echo "  * aborting entry $ENTRY_ID"
+
         # Remove the HTML temp file
         rm "$DATASET_ENTRY_HTML_PATH"
         return 0
@@ -76,39 +89,51 @@ download_entry_info() {
     # Create a folder for the dataset entry if it does not exist
     local DATASET_ENTRY_PATH="$DATASET_PATH/$ENTRY_ID"
     if [ ! -d "$DATASET_ENTRY_PATH" ]; then
-        mkdir -p "$DATASET_ENTRY_PATH"
+        mkdir --parents "$DATASET_ENTRY_PATH"
     fi
 
     # Extract the image URL
     local IMAGE_URL
-    IMAGE_URL="$BASE_WEB_URL$(xidel "$DATASET_ENTRY_HTML_PATH" -e '/html/body/div[1]/div[2]/div[2]/div[1]/div[3]/table/tbody/tr[9]/td[2]/a/@href' 2>&1)"
+    IMAGE_URL="$BASE_WEB_URL$(xidel --silent "$DATASET_ENTRY_HTML_PATH" --extract="/html/body/div[1]/div[2]/div[2]/div[1]/div[3]/table/tbody/tr[9]/td[2]/a/@href" 2>&1)"
     echo "Original image URL: $IMAGE_URL"
 
     # Download the image
     if [ -f "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" ]; then
-        echo "  * image $ENTRY_ID.fits already exists, skipping"
+        echo "  * image $ENTRY_ID.fits already exists, skipping download"
+
     else
         echo "Downloading entry image $ENTRY_ID"
-        wget -O "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" "$IMAGE_URL"
+        curl --silent --fail --output "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" "$IMAGE_URL"
+
+        # Check if the image was downloaded
+        if [ ! -f "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" ]; then
+            echo "Image $ENTRY_ID.fits could not be downloaded, dataset entry $ENTRY_ID will be incomplete"
+        fi
     fi
 
     # Extract the axy file URL
     local AXY_FILE_URL
-    AXY_FILE_URL="$BASE_WEB_URL$(xidel "$DATASET_ENTRY_HTML_PATH" -e '/html/body/div[1]/div[2]/div[2]/div[1]/div[3]/table/tbody/tr[11]/td[2]/a/@href' 2>&1)"
+    AXY_FILE_URL="$BASE_WEB_URL$(xidel --silent "$DATASET_ENTRY_HTML_PATH" --extract="/html/body/div[1]/div[2]/div[2]/div[1]/div[3]/table/tbody/tr[11]/td[2]/a/@href" 2>&1)"
     echo "axy file URL: $AXY_FILE_URL"
 
     # Download the axy file
     if [ -f "$DATASET_ENTRY_PATH/$ENTRY_ID-axy.fits" ]; then
-        echo "  * axy file $ENTRY_ID-axy.fits already exists, skipping"
+        echo "  * axy file $ENTRY_ID-axy.fits already exists, skipping download"
+
     else
         echo "Downloading entry axy file $ENTRY_ID"
-        wget -O "$DATASET_ENTRY_PATH/$ENTRY_ID-axy.fits" "$AXY_FILE_URL"
+        curl --silent --fail --output "$DATASET_ENTRY_PATH/$ENTRY_ID-axy.fits" "$AXY_FILE_URL"
+
+        # Check if the axy file was downloaded
+        if [ ! -f "$DATASET_ENTRY_PATH/$ENTRY_ID-axy.fits" ]; then
+            echo "axy file $ENTRY_ID-axy.fits could not be downloaded, dataset entry $ENTRY_ID will be incomplete"
+        fi
     fi
 
     # Remove the HTML temp file
     rm "$DATASET_ENTRY_HTML_PATH"
 
-    echo "Entry $ENTRY_ID processed"
+    echo "Entry $ENTRY_ID processing completed"
     return 0
 }
 
@@ -123,11 +148,11 @@ main() {
     do
         (
             echo "Processing entry $ENTRY_ID"
-            download_entry_info "$ENTRY_ID"
+            download_entry_info "$ENTRY_ID" || true  # Ignore errors to continue with the next dataset entry
         ) &
 
         # allow to execute up to $NUM_OF_JOBS jobs in parallel
-        if [[ $(jobs -r -p | wc -l) -ge $NUM_OF_JOBS ]]; then
+        if [[ $(jobs -r -p | wc --lines) -ge $NUM_OF_JOBS ]]; then
             # now there are $NUM_OF_JOBS jobs already running, so wait here for any
             # job to be finished so there is a place to start next one.
             wait -n

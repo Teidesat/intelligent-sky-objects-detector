@@ -12,24 +12,25 @@ IFS=$'\n\t'
 # |_ [entry_id]-axy.fits: The objects located in the image
 
 BASE_WEB_URL="https://nova.astrometry.net"
-
 DATASET_PATH="./dataset"
-if [ ! -d "$DATASET_PATH" ]; then
-    mkdir --parents "$DATASET_PATH"
-fi
-
 TEMP_DIR_PATH="./temp"
-if [ ! -d "$TEMP_DIR_PATH" ]; then
-    mkdir --parents "$TEMP_DIR_PATH"
-fi
 
 
 # Function to download the dataset entry information for a given entry ID
 download_entry_info() {
     local ENTRY_ID=$1
 
+    # Create the dataset and temp directories if they do not exist
+    if [ ! -d "$DATASET_PATH" ]; then
+        mkdir --parents "$DATASET_PATH"
+    fi
+    if [ ! -d "$TEMP_DIR_PATH" ]; then
+        mkdir --parents "$TEMP_DIR_PATH"
+    fi
+
     # Check if the dataset entry already exists
-    if [ -d "$DATASET_PATH/$ENTRY_ID" ] && [ -f "$DATASET_PATH/$ENTRY_ID/$ENTRY_ID.fits" ] && [ -f "$DATASET_PATH/$ENTRY_ID/$ENTRY_ID-axy.fits" ]; then
+    local DATASET_ENTRY_PATH="$DATASET_PATH/$ENTRY_ID"
+    if [ -d "$DATASET_ENTRY_PATH" ] && [ -f "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" ] && [ -f "$DATASET_ENTRY_PATH/$ENTRY_ID-axy.fits" ]; then
         echo "Dataset entry $ENTRY_ID already exists, aborting"
         return 0
     fi
@@ -87,7 +88,6 @@ download_entry_info() {
     fi
 
     # Create a folder for the dataset entry if it does not exist
-    local DATASET_ENTRY_PATH="$DATASET_PATH/$ENTRY_ID"
     if [ ! -d "$DATASET_ENTRY_PATH" ]; then
         mkdir --parents "$DATASET_ENTRY_PATH"
     fi
@@ -95,7 +95,7 @@ download_entry_info() {
     # Extract the image URL
     local IMAGE_URL
     IMAGE_URL="$BASE_WEB_URL$(xidel --silent "$DATASET_ENTRY_HTML_PATH" --extract="/html/body/div[1]/div[2]/div[2]/div[1]/div[3]/table/tbody/tr[9]/td[2]/a/@href" 2>&1)"
-    echo "Original image URL: $IMAGE_URL"
+    echo "Original image URL of entry $ENTRY_ID: $IMAGE_URL"
 
     # Download the image
     if [ -f "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" ]; then
@@ -117,7 +117,7 @@ download_entry_info() {
     # Extract the axy file URL
     local AXY_FILE_URL
     AXY_FILE_URL="$BASE_WEB_URL$(xidel --silent "$DATASET_ENTRY_HTML_PATH" --extract="/html/body/div[1]/div[2]/div[2]/div[1]/div[3]/table/tbody/tr[11]/td[2]/a/@href" 2>&1)"
-    echo "axy file URL: $AXY_FILE_URL"
+    echo "axy file URL of entry $ENTRY_ID: $AXY_FILE_URL"
 
     # Download the axy file
     if [ -f "$DATASET_ENTRY_PATH/$ENTRY_ID-axy.fits" ]; then
@@ -135,6 +135,12 @@ download_entry_info() {
 
     # Remove the HTML temp file
     rm "$DATASET_ENTRY_HTML_PATH"
+
+    # Remove dataset entry if it is empty
+    if [ -d $DATASET_ENTRY_PATH ] && [ ! "$(ls --almost-all $DATASET_ENTRY_PATH)" ]; then
+        echo "Dataset entry $ENTRY_ID is empty, removing it"
+        rm --dir $DATASET_ENTRY_PATH
+    fi
 
     echo "Entry $ENTRY_ID processing completed"
     return 0

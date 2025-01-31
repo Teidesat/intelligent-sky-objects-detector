@@ -108,7 +108,7 @@ download_entry_info() {
         # Check if the image was downloaded
         if [ ! -f "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" ]; then
             echo "Image $ENTRY_ID.fits could not be downloaded, dataset entry $ENTRY_ID will be incomplete"
-        elif grep --quiet "Error" "$DATASET_ENTRY_PATH/$ENTRY_ID.fits"; then
+        elif grep --quiet --extended-regexp "Error|Failed" "$DATASET_ENTRY_PATH/$ENTRY_ID.fits"; then
             echo "Image $ENTRY_ID.fits is not a valid FITS image file, dataset entry $ENTRY_ID will be incomplete"
             rm "$DATASET_ENTRY_PATH/$ENTRY_ID.fits"
         fi

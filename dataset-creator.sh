@@ -137,9 +137,9 @@ download_entry_info() {
     rm "$DATASET_ENTRY_HTML_PATH"
 
     # Remove dataset entry if it is empty
-    if [ -d $DATASET_ENTRY_PATH ] && [ ! "$(ls --almost-all $DATASET_ENTRY_PATH)" ]; then
+    if [ -d "$DATASET_ENTRY_PATH" ] && [ ! "$(ls --almost-all "$DATASET_ENTRY_PATH")" ]; then
         echo "Dataset entry $ENTRY_ID is empty, removing it"
-        rm --dir $DATASET_ENTRY_PATH
+        rm --dir "$DATASET_ENTRY_PATH"
     fi
 
     echo "Entry $ENTRY_ID processing completed"

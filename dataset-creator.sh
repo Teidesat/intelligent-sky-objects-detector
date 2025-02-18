@@ -112,6 +112,20 @@ download_entry_info() {
             echo "Image $ENTRY_ID.fits is not a valid FITS image file, dataset entry $ENTRY_ID will be incomplete"
             rm "$DATASET_ENTRY_PATH/$ENTRY_ID.fits"
         fi
+
+        # If image download was not successful
+        if [ ! -f "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" ]; then
+            PREVIEW_IMAGE_URL="$BASE_WEB_URL$(xidel --silent "$DATASET_ENTRY_HTML_PATH" --extract="//*[@id="image_container"]" 2>&1)"
+            curl --silent --fail --output "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" "$PREVIEW_IMAGE_URL"
+
+            # Check if the image was downloaded
+            if [ ! -f "$DATASET_ENTRY_PATH/$ENTRY_ID.fits" ]; then
+                echo "Image $ENTRY_ID.fits could not be downloaded, dataset entry $ENTRY_ID will be incomplete"
+            elif grep --quiet --extended-regexp "Error|Failed" "$DATASET_ENTRY_PATH/$ENTRY_ID.fits"; then
+                echo "Image $ENTRY_ID.fits is not a valid FITS image file, dataset entry $ENTRY_ID will be incomplete"
+                rm "$DATASET_ENTRY_PATH/$ENTRY_ID.fits"
+            fi
+        fi
     fi
 
     # Extract the axy file URL

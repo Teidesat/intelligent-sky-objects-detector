@@ -9,6 +9,8 @@ The CNN will be trained with images of the sky where previous astrometry has bee
 
 ## Dataset
 
+**Use dataset-downloader.py as it works best**
+
 The dataset used for the training phase was obtained from [Astrometry.net](https://nova.astrometry.net/) web page, which has lots of images of the night sky with astrometry already performed on each, providing different information about the image and its content, like the position of the stars, the coordinates and orientation of the image, etc.
 
 The dataset is composed of numerous images of the night sky, with different sizes and resolutions, and with different numbers of stars in each image. Each dataset entry is composed of two FITS files: one with the image of the sky and another with the stars' positions.

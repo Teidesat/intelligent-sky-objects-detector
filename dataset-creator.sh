@@ -3,6 +3,13 @@ set -o nounset -o errexit -o pipefail
 IFS=$'\n\t'
 
 
+#
+# Use dataset-downloader.py as it works better
+#
+
+
+
+
 # This script creates a dataset of sky images with the stars and other objects located in them.
 # The dataset is created by downloading images from Astrometry.net website by using web scraping.
 

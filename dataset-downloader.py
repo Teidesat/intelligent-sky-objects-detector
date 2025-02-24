@@ -3,6 +3,8 @@ import json
 import os
 import time
 import sys
+from tqdm import tqdm  # Import tqdm for the progress bar
+import shutil
 
 # Constants
 DEFAULT_URL = 'http://nova.astrometry.net'
@@ -11,8 +13,8 @@ AXY_FILE_URL = DEFAULT_URL + '/axy_file/'
 JOB_STATUS_URL = DEFAULT_URL + '/api/jobs/'
 
 DATASET_PATH = './dataset'
-JOB_START_ID = 1444114
-JOB_AMOUNT = 10
+JOB_START_ID = 1544128
+JOB_AMOUNT = 50
 JOBS_RANGE = range(JOB_START_ID, JOB_START_ID + JOB_AMOUNT)
 JOB_SUCCESSFUL = "{\"status\": \"success\"}"
 
@@ -25,50 +27,62 @@ CHUNK_SIZE = 8192  # 8 KB per chunk
 os.makedirs(DATASET_PATH, exist_ok=True)
 
 def download_file(url, file_path):
-    """Download a file with a timeout and speed check, delete if incomplete."""
+    """Download a file with a progress bar, timeout, and speed check. Deletes file if incomplete."""
     try:
         with requests.get(url, stream=True, timeout=TIMEOUT_SECONDS) as response:
             if response.status_code != 200:
-                print(f"Failed to download {url}: HTTP {response.status_code}")
+                print(f"\nFailed to download {url}: HTTP {response.status_code}")
                 return False
 
             # Check file type
             content_type = response.headers.get("Content-Type", "")
             if content_type != "application/fits":
-                print(f"Invalid file type ({content_type}) for {url}")
+                print(f"\nInvalid file type ({content_type}) for {url}")
                 return False
 
-            # Start the download with speed check
+            # Get total file size from headers
+            total_size = int(response.headers.get("Content-Length", 0))
+
             start_time = time.time()
             total_bytes = 0
 
-            with open(file_path, "wb") as file:
+            with open(file_path, "wb") as file, tqdm(
+                total=total_size,
+                unit="B",
+                unit_scale=True,
+                desc=f"Downloading {os.path.basename(file_path)}",
+                dynamic_ncols=True,
+                leave=False  # Prevents old progress bars from stacking
+            ) as progress_bar:
                 for chunk in response.iter_content(CHUNK_SIZE):
-                    if not chunk:  # Connection lost
+                    if not chunk:
                         break
                     file.write(chunk)
                     total_bytes += len(chunk)
 
-                    # Check speed
+                    # Update progress bar
+                    progress_bar.update(len(chunk))
+
+                    # Calculate and display speed
                     elapsed_time = time.time() - start_time
                     if elapsed_time > 0:
                         speed_kbps = (total_bytes / elapsed_time) / 1024  # Convert to KB/s
-                        sys.stdout.write(f"\rDownloading {file_path} - Speed: {speed_kbps:.2f} KB/s")
-                        sys.stdout.flush()
+                        progress_bar.set_postfix({"Speed": f"{speed_kbps:.2f} KB/s"})
 
+                    # Check speed threshold
                     if elapsed_time > 0 and (total_bytes / elapsed_time) < MIN_SPEED_BPS:
-                        print(f"Download too slow ({total_bytes / elapsed_time:.2f} Bps), aborting {file_path}")
+                        print(f"\nDownload too slow ({total_bytes / elapsed_time:.2f} Bps), aborting {file_path}")
                         file.close()
                         os.remove(file_path)  # Delete partial file
                         return False
 
-            print(f"Downloaded {file_path} ({total_bytes} bytes\n)")
+            print(f"\nDownloaded {file_path} ({total_bytes} bytes)")
             return True
 
     except requests.exceptions.Timeout:
-        print(f"Timeout while downloading {url}")
+        print(f"\nTimeout while downloading {url}")
     except requests.exceptions.RequestException as e:
-        print(f"Error downloading {url}: {e}")
+        print(f"\nError downloading {url}: {e}")
 
     # Cleanup in case of failure
     if os.path.exists(file_path):
@@ -77,7 +91,7 @@ def download_file(url, file_path):
 
 # Process each job
 for job_id in JOBS_RANGE:
-    print(f"Processing job {job_id}...")
+    print(f"\nProcessing job {job_id}...")
 
     try:
         status_response = requests.get(JOB_STATUS_URL + str(job_id), timeout=TIMEOUT_SECONDS)
@@ -90,19 +104,18 @@ for job_id in JOBS_RANGE:
 
             axy_success = download_file(AXY_FILE_URL + str(job_id), axy_path)
             if axy_success:
-              img_success = download_file(FITS_FILE_URL + str(job_id), img_path)
-            
+                img_success = download_file(FITS_FILE_URL + str(job_id), img_path)
 
             if img_success and axy_success:
-                print(f"Successfully downloaded job {job_id}")
+                print(f"\n✅ Successfully downloaded job {job_id}")
             else:
-                print(f"Failed to fully download job {job_id}")
+                print(f"\n❌ Failed to fully download job {job_id}")
                 if os.path.exists(image_folder):
-                  os.remove(image_folder)
+                    shutil.rmtree(image_folder, ignore_errors=True)
         else:
-            print(f"Job {job_id} was not successful")
+            print(f"\n⚠️ Job {job_id} was not successful")
 
     except requests.exceptions.RequestException as e:
-        print(f"Failed to check status for job {job_id}: {e}")
+        print(f"\nFailed to check status for job {job_id}: {e}")
 
-print("Download process completed.")
+print("\n✅ Download process completed.")

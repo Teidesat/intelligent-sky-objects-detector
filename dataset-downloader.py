@@ -34,31 +34,35 @@ def main():
     # Process each job
     for job_id in JOBS_RANGE:
         print(f"\nProcessing job {job_id}...")
+        image_folder = os.path.join(DATASET_PATH, str(job_id))
 
         try:
             status_response = requests.get(JOB_STATUS_URL + str(job_id), timeout=TIMEOUT_SECONDS)
-            if status_response.content.decode() == JOB_SUCCESSFUL:
-                image_folder = os.path.join(DATASET_PATH, str(job_id))
-                os.makedirs(image_folder, exist_ok=True)
-
-                img_path = os.path.join(image_folder, f"{job_id}.fits")
-                axy_path = os.path.join(image_folder, f"{job_id}axy.fits")
-
-                axy_success = download_file(AXY_FILE_URL + str(job_id), axy_path)
-                if axy_success:
-                    img_success = download_file(FITS_FILE_URL + str(job_id), img_path)
-
-                if img_success and axy_success:
-                    print(f"\n✅ Successfully downloaded job {job_id}")
-                else:
-                    print(f"\n❌ Failed to fully download job {job_id}")
-                    if os.path.exists(image_folder):
-                        shutil.rmtree(image_folder, ignore_errors=True)
-            else:
+            if status_response.content.decode() != JOB_SUCCESSFUL:
                 print(f"\n⚠️ Job {job_id} was not successful")
+                continue
+
+            os.makedirs(image_folder, exist_ok=True)
+
+            axy_path = os.path.join(image_folder, f"{job_id}-axy.fits")
+            axy_success = download_file(AXY_FILE_URL + str(job_id), axy_path)
+            if not axy_success:
+                raise AssertionError
+
+            img_path = os.path.join(image_folder, f"{job_id}-image.fits")
+            img_success = download_file(FITS_FILE_URL + str(job_id), img_path)
+            if not img_success:
+                raise AssertionError
+
+            print(f"\n✅ Successfully downloaded job {job_id}")
 
         except requests.exceptions.RequestException as e:
             print(f"\nFailed to check status for job {job_id}: {e}")
+
+        except AssertionError:
+            print(f"\n❌ Failed to fully download job {job_id}")
+            if os.path.exists(image_folder):
+                shutil.rmtree(image_folder, ignore_errors=True)
 
     print("\n✅ Download process completed.")
 

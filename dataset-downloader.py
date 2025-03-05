@@ -1,13 +1,19 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Python script to download dataset images and their corresponding .axy files from the
+ Astrometry.net API.
+"""
+
 import requests
-import json
 import os
 import time
-import sys
-from tqdm import tqdm  # Import tqdm for the progress bar
 import shutil
 
+from tqdm import tqdm  # Import tqdm for the progress bar
+
 # Constants
-DEFAULT_URL = 'http://nova.astrometry.net'
+DEFAULT_URL = 'https://nova.astrometry.net'
 FITS_FILE_URL = DEFAULT_URL + '/new_fits_file/'
 AXY_FILE_URL = DEFAULT_URL + '/axy_file/'
 JOB_STATUS_URL = DEFAULT_URL + '/api/jobs/'
@@ -22,9 +28,6 @@ JOB_SUCCESSFUL = "{\"status\": \"success\"}"
 TIMEOUT_SECONDS = 10  # Max time to wait for a response
 MIN_SPEED_BPS = 5000  # Minimum acceptable speed in bytes per second
 CHUNK_SIZE = 8192  # 8 KB per chunk
-
-# Ensure dataset folder exists
-os.makedirs(DATASET_PATH, exist_ok=True)
 
 
 def main():

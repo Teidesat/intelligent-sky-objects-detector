@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta:__legacy__"
+
+[project]
+name = "intelligent-sky-objects-detector"
+version = "0.1.0"
+description = "Sky object detection using U-Net segmentation on astrometry.net FITS images"
+requires-python = ">=3.10"
+
+dependencies = [
+    "opencv-python>=4.8.0",
+    "astropy>=6.0.0",
+    "scikit-learn>=1.4.0",
+    "scipy>=1.12.0",
+    "matplotlib>=3.8.0",
+    "numpy>=1.26.0,<2",
+    "requests>=2.31.0",
+    "tqdm>=4.66.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

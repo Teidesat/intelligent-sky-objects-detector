@@ -18,9 +18,9 @@ FITS_FILE_URL = DEFAULT_URL + "/new_fits_file/"
 AXY_FILE_URL = DEFAULT_URL + "/axy_file/"
 JOB_STATUS_URL = DEFAULT_URL + "/api/jobs/"
 
-DATASET_PATH = "./dataset"
+DATASET_PATH = "/app/data/dataset"
 JOB_START_ID = 1544128
-JOB_AMOUNT = 50
+JOB_AMOUNT = 5000
 JOBS_RANGE = range(JOB_START_ID, JOB_START_ID + JOB_AMOUNT)
 JOB_SUCCESSFUL = '{"status": "success"}'
 

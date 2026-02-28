@@ -3,3 +3,6 @@
 
 dataset/
 trained-models/
+
+__pycache__/
+*.pyc

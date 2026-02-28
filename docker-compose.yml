@@ -1,0 +1,61 @@
+services:
+  download:
+    build: .
+    image: sky-detector
+    command: python src/dataset_downloader/dataset_downloader.py
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+
+  train:
+    build: .
+    image: sky-detector
+    command: python -m src.model_training.train   # <-- cambio clave
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  infer:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_analysis.run_inference
+      --model /app/data/trained-models/model.keras
+      --image /app/data/dataset/sample/sample-image.fits
+      --output /app/data/performance/infer_result.png
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  eval:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_analysis.run_evaluation
+      --model /app/data/trained-models/model.keras
+      --dataset /app/data/dataset/
+      --output /app/data/performance/
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

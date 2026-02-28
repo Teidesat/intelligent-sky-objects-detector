@@ -1,0 +1,93 @@
+from pathlib import Path
+
+import astropy.io.fits as fits
+import cv2 as cv
+import numpy as np
+
+from .entry import DatasetEntry
+from .normalization.normalization_interface import NormalizationStrategy
+from .masking.masking_interface import MaskingStrategy
+
+
+class DatasetLoader:
+    """
+    Loads a directory of astrometry.net entries into DatasetEntry objects.
+    """
+
+    def __init__(self, normalization: NormalizationStrategy, masking: MaskingStrategy, target_shape: tuple = (256, 256), ):
+        self.normalization = normalization
+        self.masking = masking
+        self.target_shape = target_shape  
+
+    def load(self, dataset_path: Path) -> dict[str, DatasetEntry]:
+        dataset = {}
+        for entry_path in dataset_path.iterdir():
+            if not entry_path.is_dir():
+                print(f"Skipping non-directory: {entry_path}")
+                continue
+            entry = self._load_entry(entry_path)
+            if entry is not None:
+                dataset[entry.entry_id] = entry
+        print(f"\nDataset loaded: {len(dataset)} entries")
+        return dataset
+
+    def _load_entry(self, entry_path: Path) -> DatasetEntry | None:
+        entry_id = entry_path.name
+        try:
+            fits_image = self._read_fits_image(entry_path, entry_id)
+            detected_objects = self._read_detected_objects(entry_path, entry_id)
+        except (OSError, ValueError, TypeError) as exc:
+            print(f"Skipping {entry_id}: {exc}")
+            return None
+
+        monochrome = self._to_monochrome(fits_image, entry_id)
+        if monochrome is None:
+            return None
+
+        normalized = self.normalization.normalize(monochrome)
+        resized = cv.resize(normalized, (self.target_shape[1], self.target_shape[0]))
+
+        objects_info = np.stack(
+            [detected_objects["X"], detected_objects["Y"], detected_objects["FLUX"]],
+            axis=-1,
+        )
+
+        mask, filtered_objects = self.masking.build_mask(
+            objects_info=objects_info,
+            original_image_shape=monochrome.shape,
+            target_shape=self.target_shape,
+        )
+
+        return DatasetEntry(
+            entry_id=entry_id,
+            nn_input_image=resized.copy(),
+            segmentation_mask=mask.copy(),
+            filtered_objects=filtered_objects,
+        )
+
+    def _read_fits_image(self, entry_path: Path, entry_id: str) -> np.ndarray:
+        with fits.open(entry_path / f"{entry_id}-image.fits") as hdul:
+            data = hdul[0].data
+        if data is None:
+            raise ValueError("Empty FITS image")
+        return data
+
+    def _read_detected_objects(self, entry_path: Path, entry_id: str):
+        with fits.open(entry_path / f"{entry_id}-axy.fits") as hdul:
+            data = hdul[1].data
+        if data is None or len(data) == 0:
+            raise ValueError("Empty or missing objects table")
+        return data
+
+    def _to_monochrome(self, fits_image: np.ndarray, entry_id: str) -> np.ndarray | None:
+        if len(fits_image.shape) == 2:
+            return fits_image.astype(np.float32)
+        if len(fits_image.shape) == 3 and fits_image.shape[0] == 3:
+            try:
+                rgb = np.rollaxis(fits_image, 0, 3)
+                return cv.cvtColor(rgb, cv.COLOR_BGR2GRAY).astype(np.float32)
+            except cv.error:
+                print(f"Warning! Could not convert to monochrome: {entry_id}")
+                return None
+        print(f"Warning! Unknown image shape {fits_image.shape} at {entry_id}")
+        return None

@@ -1,9 +1,8 @@
 from tensorflow import keras
 
-from .models_interface import ModelStrategy
+from .u_net_base_interface import UNetBase
 
-
-class UNet4Levels(ModelStrategy):
+class UNet4Levels(UNetBase):
     """
     Original U-Net with 4 encoder/decoder levels.
 
@@ -28,21 +27,3 @@ class UNet4Levels(ModelStrategy):
 
         outputs = keras.layers.Conv2D(num_classes, 1, activation="softmax")(x)
         return keras.Model(inputs=inputs, outputs=outputs)
-
-    @staticmethod
-    def _conv_block(x, filters: int):
-        x = keras.layers.Conv2D(filters, 3, activation="relu", padding="same")(x)
-        x = keras.layers.Conv2D(filters, 3, activation="relu", padding="same")(x)
-        return x
-
-    def _encoder_block(self, x, filters: int):
-        conv = self._conv_block(x, filters)
-        pool = keras.layers.MaxPooling2D()(conv)
-        return conv, pool
-
-    def _decoder_block(self, x, skip, filters: int):
-        x = keras.layers.UpSampling2D()(x)
-        x = keras.layers.Conv2D(filters, 2, activation="relu", padding="same")(x)
-        x = keras.layers.concatenate([skip, x], axis=3)
-        x = self._conv_block(x, filters)
-        return x

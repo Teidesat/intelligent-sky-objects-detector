@@ -2,7 +2,7 @@ from typing import Callable
 
 from tensorflow import keras
 
-from .base import LossStrategy
+from .losses_interface import LossStrategy
 
 
 class CrossEntropyLoss(LossStrategy):

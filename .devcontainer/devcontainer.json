@@ -1,16 +1,26 @@
 {
     "name": "Intelligent Sky Objects Detector",
-    "dockerComposeFile": "../docker-compose.yml",
-    "service": "train",
+    "build": {
+        "dockerfile": "../Dockerfile"
+    },
     "workspaceFolder": "/app",
-
+    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+    "runArgs": ["--gpus", "all"],
+    "overrideCommand": true,
+    "remoteUser": "root",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-from-docker:1": {
+            "version": "latest",
+            "enableNonRootDocker": "true",
+            "moby": "false"
+        }
+    },
     "customizations": {
         "vscode": {
             "extensions": [
                 "ms-python.python",
                 "ms-python.vscode-pylance",
                 "ms-python.debugpy",
-                "ms-vscode.ipynb",
                 "usernamehw.errorlens"
             ],
             "settings": {
@@ -21,13 +31,13 @@
             }
         }
     },
-
-    "overrideCommand": true,
-
     "forwardPorts": [6006],
     "portsAttributes": {
         "6006": {
             "label": "TensorBoard"
         }
-    }
+    },
+    "mounts": [
+        "source=${localWorkspaceFolder}/data,target=/app/data,type=bind"
+    ]
 }

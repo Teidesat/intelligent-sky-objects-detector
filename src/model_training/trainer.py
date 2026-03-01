@@ -36,7 +36,10 @@ class Trainer:
         self.model.compile(
             optimizer="adam",
             loss=self.loss_strategy.get_loss(),
-            metrics=[keras.metrics.SparseCategoricalAccuracy()],
+            metrics=[
+                keras.metrics.BinaryAccuracy(name='acc'),
+                keras.metrics.MeanIoU(num_classes=2, name='iou')
+            ]
         )
         self.model.summary()
         return self.model

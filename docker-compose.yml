@@ -12,12 +12,17 @@ services:
   train:
     build: .
     image: sky-detector
-    command: python -m src.model_training.train   # <-- cambio clave
+    command: python -m src.model_training.train --dataset /app/data/dataset --output /app/data/trained-models/model.keras --performance /app/data/performance
+    user: root
     volumes:
       - ./data:/app/data
       - ./src:/app/src
+    runtime: nvidia
     environment:
       - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - XLA_FLAGS=--xla_gpu_force_compilation_parallelism=1
+      - TF_XLA_FLAGS=--tf_xla_auto_jit=2
     deploy:
       resources:
         reservations:

@@ -1,11 +1,10 @@
-# Base image: TensorFlow official with GPU + CUDA support
-FROM tensorflow/tensorflow:2.16.1-gpu
+# Base con CUDA 12.6 y cuDNN 9 (compatible con RTX 5060)
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
 
-# Avoid interactive prompts during apt installs
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
+    python3 python3-pip \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
@@ -15,29 +14,24 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
 WORKDIR /app
 
-# Copy only pyproject.toml first (for layer caching)
 COPY pyproject.toml .
+COPY extract_deps.py .
 
-# Install tomli (to read pyproject.toml in Python 3.10)
 RUN pip install --no-cache-dir tomli
+RUN python extract_deps.py
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r dev-requirements.txt || true
 
-# Extract and install production dependencies (excluding tensorflow if desired)
-RUN python -c "import tomli; data = tomli.load(open('pyproject.toml', 'rb')); deps = data['project']['dependencies']; print('\n'.join(deps))" > requirements.txt && \
-    pip install --no-cache-dir -r requirements.txt
+# Instalar TensorFlow NIGHTLY (con soporte potencial para CC 12.0)
+RUN pip install --no-cache-dir --upgrade tf-nightly
 
-# Optionally install development dependencies
-RUN python -c "import tomli; data = tomli.load(open('pyproject.toml', 'rb')); dev_deps = data['project']['optional-dependencies'].get('dev', []); print('\n'.join(dev_deps))" > dev-requirements.txt && \
-    pip install --no-cache-dir -r dev-requirements.txt || true
+# O si prefieres una versión estable más reciente (cuando salga 2.20+)
+# RUN pip install --no-cache-dir tensorflow==2.20.0
 
-# Create necessary directories (optional, as volumes will be mounted)
 RUN mkdir -p /app/src /app/data /app/docs
 
-# (Optional) Create a non-root user for security
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
-
-# Default command (can be overridden)
 CMD ["python", "src/model_training/train.py"]

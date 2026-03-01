@@ -41,7 +41,8 @@ class Detector:
     def predict_mask(self, preprocessed_image: np.ndarray) -> np.ndarray:
         tensor = tf.convert_to_tensor([np.expand_dims(preprocessed_image, axis=-1)])
         predicted = self.model.predict(tensor, verbose=0)[0]
-        return np.argmax(predicted, axis=-1).astype(np.uint8)
+        binary_mask = (predicted[..., 0] > 0.5).astype(np.uint8)
+        return binary_mask
 
     def predict_from_raw(self, raw_image: np.ndarray) -> tuple[np.ndarray, list[tuple]]:
         normalized = self.normalization.normalize(raw_image)

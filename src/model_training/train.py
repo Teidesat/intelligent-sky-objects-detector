@@ -27,9 +27,14 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from model_training.data_preprocessing.loader import DatasetLoader
 from model_training.data_preprocessing.normalization.log_normalization import LogPercentileNormalization
+from model_training.data_preprocessing.normalization.simple_max_normalization import SimpleMaxNormalization
 from model_training.data_preprocessing.masking.circular_dynamic_masking import CircularDynamicMasking
+from model_training.data_preprocessing.masking.bbox_masking import SimpleBboxMasking
 from model_training.modelling_specs.losses.dice_loss import DiceLoss
+from model_training.modelling_specs.losses.combined_loss import CombinedLoss
+from model_training.modelling_specs.losses.cross_entropy_loss import CrossEntropyLoss
 from model_training.modelling_specs.models.u_net_3_levels import UNet3Levels
+from model_training.modelling_specs.models.u_net_4_levels import UNet4Levels
 from model_training.trainer import Trainer
 from model_training.auxiliary_functions import dataset_to_tensors
 
@@ -106,7 +111,7 @@ def main():
 
     # Strategies
     normalization  = LogPercentileNormalization(lowest_percentile=1.0, highest_percentile=99.0)
-    masking        = CircularDynamicMasking(flux_percentile=30, merge_radius=8, min_radius=3, max_radius=12)
+    masking        = CircularDynamicMasking(flux_percentile=30, merge_radius=8, min_radius=1, max_radius=4)
     loss           = DiceLoss()
     model_strategy = UNet3Levels()
     postprocessing = MorphologicalClosing(kernel_size=7, min_area=4.0)
@@ -130,6 +135,17 @@ def main():
     # Tensors 
     train_images, train_masks = dataset_to_tensors(train_dataset)
     val_images,   val_masks   = dataset_to_tensors(val_dataset)
+
+    train_star_px = tf.reduce_sum(tf.cast(train_masks, tf.float32)).numpy()
+    val_star_px   = tf.reduce_sum(tf.cast(val_masks, tf.float32)).numpy()
+    train_total   = train_masks.shape[0] * 256 * 256
+    val_total     = val_masks.shape[0] * 256 * 256
+    print(f"Train star pixels: {train_star_px:.0f} / {train_total} = {train_star_px/train_total:.4%}")
+    print(f"Val   star pixels: {val_star_px:.0f}   / {val_total}   = {val_star_px/val_total:.4%}")
+
+    print("Tamaño train:", len(train_images))
+    print("Tamaño val:", len(val_images))
+    print("Train mask unique:", tf.unique(tf.reshape(train_masks[0], [-1]))[0].numpy())
 
     # Train
     trainer = Trainer(

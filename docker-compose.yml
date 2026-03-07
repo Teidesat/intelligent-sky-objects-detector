@@ -12,7 +12,7 @@ services:
   train:
     build: .
     image: sky-detector
-    command: python -m src.model_training.train --dataset /app/data/dataset --output /app/data/trained-models/model.keras --performance /app/data/performance
+    command: python -m src.model_training.train --dataset /app/data/dataset --output /app/data/trained-models --performance /app/data/performance
     user: root
     volumes:
       - ./data:/app/data
@@ -21,8 +21,7 @@ services:
     environment:
       - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
       - NVIDIA_VISIBLE_DEVICES=all
-      - XLA_FLAGS=--xla_gpu_force_compilation_parallelism=1
-      - TF_XLA_FLAGS=--tf_xla_auto_jit=2
+      - PYTHONPATH=/app/src
     deploy:
       resources:
         reservations:
@@ -36,7 +35,7 @@ services:
     image: sky-detector
     command: >
       python -m src.model_applications.run_inference
-      --model /app/data/trained-models/model.keras
+      --model /app/data/trained-models/model.pt
       --image /app/data/dataset/sample/sample-image.fits
       --output /app/data/performance/infer_result.png
     volumes:
@@ -44,6 +43,7 @@ services:
       - ./src:/app/src
     environment:
       - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - PYTHONPATH=/app/src
     deploy:
       resources:
         reservations:
@@ -57,7 +57,7 @@ services:
     image: sky-detector
     command: >
       python -m src.model_applications.run_evaluation
-      --model /app/data/trained-models/model.keras
+      --model /app/data/trained-models/model.pt
       --dataset /app/data/dataset/
       --output /app/data/performance/
     volumes:
@@ -65,6 +65,7 @@ services:
       - ./src:/app/src
     environment:
       - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - PYTHONPATH=/app/src
     deploy:
       resources:
         reservations:

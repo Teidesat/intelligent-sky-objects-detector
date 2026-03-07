@@ -20,8 +20,8 @@ if not api_key:
     raise ValueError("No se encontró la API key en el entorno")
 
 DATASET_PATH = "/app/data/dataset"
-JOB_START_ID = 1544128
-JOB_AMOUNT = 5000
+JOB_START_ID = 1545567
+JOB_AMOUNT = 500
 JOBS_RANGE = range(JOB_START_ID, JOB_START_ID + JOB_AMOUNT)
 TIMEOUT_SECONDS = 10
 CHUNK_SIZE = 8192

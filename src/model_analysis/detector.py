@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
+import torch
+import torch.nn as nn
 import cv2 as cv
 
 from .postprocessing.postprocessing_interface import PostprocessingStrategy
@@ -16,15 +16,18 @@ class Detector:
 
     def __init__(
         self,
-        model: keras.Model,
+        model: nn.Module,
         postprocessing: PostprocessingStrategy,
         normalization: NormalizationStrategy,
         target_shape: tuple = (256, 256),
     ):
         self.model = model
         self.postprocessing = postprocessing
-        self.normalization = normalization    # Needed for "from raw"
+        self.normalization = normalization
         self.target_shape = target_shape
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
+        self.model.eval()
 
     @classmethod
     def from_saved_model(
@@ -34,14 +37,23 @@ class Detector:
         normalization: NormalizationStrategy,
         target_shape: tuple = (256, 256),
     ) -> "Detector":
-
-        model = keras.models.load_model(str(model_path), compile=False)
+        model = torch.load(str(model_path), map_location="cpu")
         return cls(model, postprocessing, normalization, target_shape)
 
     def predict_mask(self, preprocessed_image: np.ndarray) -> np.ndarray:
-        tensor = tf.convert_to_tensor([np.expand_dims(preprocessed_image, axis=-1)])
-        predicted = self.model.predict(tensor, verbose=0)[0]
-        binary_mask = (predicted[..., 0] > 0.5).astype(np.uint8)
+        # (H, W) → (H, W, 1)
+        if preprocessed_image.ndim == 2:
+            preprocessed_image = preprocessed_image[:, :, np.newaxis]
+
+        # (H, W, 1) → (1, 1, H, W)
+        tensor = torch.tensor(preprocessed_image, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
+        tensor = tensor.to(self.device)
+
+        with torch.no_grad():
+            predicted = self.model(tensor)  # (1, C, H, W)
+
+        prob = predicted[0, 0].cpu().numpy()
+        binary_mask = (prob > 0.5).astype(np.uint8)
         return binary_mask
 
     def predict_from_raw(self, raw_image: np.ndarray) -> tuple[np.ndarray, list[tuple]]:

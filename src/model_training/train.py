@@ -3,27 +3,20 @@ train.py — Entry point for training.
 
 To swap any strategy, change only the instantiation in the Strategies section:
 
-    normalization = SimpleMaxNormalization()    # instead of LogPercentile
-    loss          = SparseCategoricalLoss()     # instead of DiceLoss
-    model         = UNet4Levels()              # instead of UNet3Levels
+    normalization  = SimpleMaxNormalization()
+    loss           = CrossEntropyLoss()
+    model_strategy = UNet4Levels()
 """
 
-import os
 import sys
 import argparse
 from pathlib import Path
 
-os.environ["XLA_FLAGS"] = "--xla_gpu_cuda_data_dir=/opt/cuda"
-os.environ["PATH"] = f"/usr/local/cuda-12.8/bin:{os.environ['PATH']}"
-try:
-    os.environ["LD_LIBRARY_PATH"] = f"/usr/local/cuda-12.8/:{os.environ['LD_LIBRARY_PATH']}"
-except KeyError:
-    os.environ["LD_LIBRARY_PATH"] = "/usr/local/cuda-12.8/"
-
-import tensorflow as tf
+import numpy as np
+import torch
 from sklearn.model_selection import train_test_split
 
-sys.path.append(str(Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
 
 from model_training.data_preprocessing.loader import DatasetLoader
 from model_training.data_preprocessing.normalization.log_normalization import LogPercentileNormalization
@@ -33,8 +26,8 @@ from model_training.data_preprocessing.masking.bbox_masking import SimpleBboxMas
 from model_training.modelling_specs.losses.dice_loss import DiceLoss
 from model_training.modelling_specs.losses.combined_loss import CombinedLoss
 from model_training.modelling_specs.losses.cross_entropy_loss import CrossEntropyLoss
-from model_training.modelling_specs.models.u_net_3_levels import UNet3Levels
-from model_training.modelling_specs.models.u_net_4_levels import UNet4Levels
+from model_training.modelling_specs.models.U_Net_3_levels import UNet3Levels
+from model_training.modelling_specs.models.U_Net_4_levels import UNet4Levels
 from model_training.trainer import Trainer
 from model_training.auxiliary_functions import dataset_to_tensors
 
@@ -106,7 +99,6 @@ def parse_args():
 
 def main():
     args = parse_args()
-
     TARGET_SHAPE = (args.shape, args.shape)
 
     # Strategies
@@ -132,20 +124,20 @@ def main():
 
     print(f"Train: {len(train_dataset)} | Test: {len(test_dataset)} | Val: {len(val_dataset)}")
 
-    # Tensors 
+    # Tensors
     train_images, train_masks = dataset_to_tensors(train_dataset)
     val_images,   val_masks   = dataset_to_tensors(val_dataset)
 
-    train_star_px = tf.reduce_sum(tf.cast(train_masks, tf.float32)).numpy()
-    val_star_px   = tf.reduce_sum(tf.cast(val_masks, tf.float32)).numpy()
-    train_total   = train_masks.shape[0] * 256 * 256
-    val_total     = val_masks.shape[0] * 256 * 256
+    train_star_px = train_masks.float().sum().item()
+    val_star_px   = val_masks.float().sum().item()
+    train_total   = train_masks.shape[0] * args.shape * args.shape
+    val_total     = val_masks.shape[0]   * args.shape * args.shape
     print(f"Train star pixels: {train_star_px:.0f} / {train_total} = {train_star_px/train_total:.4%}")
     print(f"Val   star pixels: {val_star_px:.0f}   / {val_total}   = {val_star_px/val_total:.4%}")
 
     print("Tamaño train:", len(train_images))
-    print("Tamaño val:", len(val_images))
-    print("Train mask unique:", tf.unique(tf.reshape(train_masks[0], [-1]))[0].numpy())
+    print("Tamaño val:",   len(val_images))
+    print("Train mask unique:", train_masks[0].unique().tolist())
 
     # Train
     trainer = Trainer(

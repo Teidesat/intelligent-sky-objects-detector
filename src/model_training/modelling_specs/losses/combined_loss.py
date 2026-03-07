@@ -1,37 +1,22 @@
 from typing import Callable
-import tensorflow as tf
+
+import torch
+
 from .losses_interface import LossStrategy
 
+
 class CombinedLoss(LossStrategy):
-    """
-    Combines binary cross-entropy and Dice loss for binary segmentation (1 output channel).
-    """
-    def __init__(self, bce_weight: float = 1.0, dice_weight: float = 1.0):
-        self.bce_weight = bce_weight
-        self.dice_weight = dice_weight
+    """Weighted combination of two loss functions."""
+
+    def __init__(self, loss_a: LossStrategy, loss_b: LossStrategy, weight_a: float = 0.5):
+        self.loss_a = loss_a.get_loss()
+        self.loss_b = loss_b.get_loss()
+        self.weight_a = weight_a
+        self.weight_b = 1.0 - weight_a
 
     def get_loss(self) -> Callable:
-        bce_weight = self.bce_weight
-        dice_weight = self.dice_weight
+        def combined(y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
+            return self.weight_a * self.loss_a(y_pred, y_true) + \
+                   self.weight_b * self.loss_b(y_pred, y_true)
 
-        def combined_loss(y_true, y_pred):
-            y_true = tf.cast(y_true, tf.float32)
-            y_pred = tf.cast(y_pred, tf.float32)
-
-            if len(y_true.shape) == 3:
-                y_true = tf.expand_dims(y_true, axis=-1)
-            if len(y_pred.shape) == 3:
-                y_pred = tf.expand_dims(y_pred, axis=-1)
-
-            bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
-            bce = tf.reduce_mean(bce)  
-
-            smooth = 1e-6
-            intersection = tf.reduce_sum(y_true * y_pred, axis=[1,2,3])
-            union = tf.reduce_sum(y_true + y_pred, axis=[1,2,3])
-            dice = 1 - (2. * intersection + smooth) / (union + smooth)
-            dice = tf.reduce_mean(dice)
-
-            return bce_weight * bce + dice_weight * dice
-
-        return combined_loss
+        return combined

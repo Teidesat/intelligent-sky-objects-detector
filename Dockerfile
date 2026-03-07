@@ -26,12 +26,12 @@ RUN python extract_deps.py
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir -r dev-requirements.txt || true
 
-# Instalar TensorFlow NIGHTLY (con soporte potencial para CC 12.0)
-RUN pip install --no-cache-dir --upgrade tf-nightly
-
-# O si prefieres una versión estable más reciente (cuando salga 2.20+)
-# RUN pip install --no-cache-dir tensorflow==2.20.0
+# PyTorch con soporte CUDA 12.6
+RUN pip install --no-cache-dir \
+    torch \
+    torchvision \
+    --index-url https://download.pytorch.org/whl/cu126
 
 RUN mkdir -p /app/src /app/data /app/docs
 
-CMD ["python", "src/model_training/train.py"]
+CMD ["python", "-m", "model_training.train"]

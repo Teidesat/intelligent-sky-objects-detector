@@ -34,7 +34,7 @@
     "forwardPorts": [6006],
     "portsAttributes": {
         "6006": {
-            "label": "TensorBoard"
+            "label": "TensorBoard (PyTorch)"
         }
     },
     "mounts": [

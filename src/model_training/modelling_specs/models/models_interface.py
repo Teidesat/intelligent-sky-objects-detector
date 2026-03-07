@@ -1,18 +1,17 @@
 from abc import ABC, abstractmethod
-
-from tensorflow import keras
+import torch.nn as nn
 
 
 class ModelStrategy(ABC):
 
     @abstractmethod
-    def build(self, input_shape: tuple, num_classes: int) -> keras.Model:
+    def build(self, input_shape: tuple, num_classes: int) -> nn.Module:
         """
         Args:
             input_shape: (H, W, C) tuple e.g. (256, 256, 1).
             num_classes: number of segmentation classes.
 
         Returns:
-            Uncompiled keras.Model instance.
+            nn.Module instance.
         """
         ...

@@ -1,16 +1,19 @@
 import numpy as np
-import tensorflow as tf
+import torch
 
 
-def dataset_to_tensors(dataset: dict) -> tuple[tf.Tensor, tf.Tensor]:
+def dataset_to_tensors(dataset: dict) -> tuple[torch.Tensor, torch.Tensor]:
     """
-    Convert a dataset dict of DatasetEntry objects into TensorFlow tensors.
+    Convert a dataset dict of DatasetEntry objects into PyTorch tensors.
+    Images: (B, H, W, 1) float32
+    Masks:  (B, H, W)    int32
     """
     images, masks = [], []
     for entry in dataset.values():
-        images.append(np.expand_dims(entry.nn_input_image, axis=-1).tolist())
-        masks.append(entry.segmentation_mask.tolist())
+        images.append(np.expand_dims(entry.nn_input_image, axis=-1))
+        masks.append(entry.segmentation_mask)
+
     return (
-        tf.convert_to_tensor(images, dtype=tf.float32),
-        tf.convert_to_tensor(masks, dtype=tf.int32),
+        torch.tensor(np.stack(images), dtype=torch.float32),
+        torch.tensor(np.stack(masks),  dtype=torch.long),
     )

@@ -1,14 +1,14 @@
 from typing import Callable
 
-from tensorflow import keras
+import torch.nn as nn
 
 from .losses_interface import LossStrategy
 
 
 class CrossEntropyLoss(LossStrategy):
-    """
-    Cross-entropy loss
-    """
+    """Cross-entropy loss (multi-class, sparse targets)."""
 
     def get_loss(self) -> Callable:
-        return keras.losses.SparseCategoricalCrossentropy()
+        # nn.CrossEntropyLoss es Callable: loss(y_pred, y_true)
+        # Espera preds: (B, C, H, W) y targets: (B, H, W) con dtype long
+        return nn.CrossEntropyLoss()

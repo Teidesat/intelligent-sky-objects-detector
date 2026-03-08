@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 from scipy.spatial.distance import cdist
+from scipy.spatial import cKDTree
 
 from .masking_interface import MaskingStrategy
 
@@ -24,6 +25,14 @@ class CircularDynamicMasking(MaskingStrategy):
         flux_threshold = np.percentile(objects_info[:, 2], self.flux_percentile)
 
         adapted = self._adapt_and_filter(objects_info, original_image_shape, target_shape, flux_threshold)
+        
+        # MAX_OBJECTS = 300  # Ajusta según tu paciencia
+        # if len(objects_info) > MAX_OBJECTS:
+            # Ordenar por flujo y quedarse con los más brillantes
+            # objects_info = objects_info[np.argsort(objects_info[:, 2])[::-1][:MAX_OBJECTS]]
+        
+        # adapted = self._adapt_and_filter(objects_info, original_image_shape, target_shape, flux_threshold)
+
         merged = self._merge_nearby(adapted)
 
         mask = np.zeros(target_shape, dtype=np.uint8)
@@ -58,17 +67,48 @@ class CircularDynamicMasking(MaskingStrategy):
         return adapted
 
     def _merge_nearby(self, objects: list) -> list:
-        if not objects:
-            return []
+        if len(objects) <= 1:
+            return objects
+        
         coords = np.array([(o[0], o[1]) for o in objects])
         fluxes = np.array([o[2] for o in objects])
-        distances = cdist(coords, coords)
-        merged, used = [], set()
-        for i in range(len(objects)):
-            if i in used:
-                continue
-            nearby = [j for j in np.where(distances[i] < self.merge_radius)[0] if j not in used]
-            best = nearby[int(np.argmax(fluxes[nearby]))]
-            merged.append(objects[best])
-            used.update(nearby)
+        
+        # Construir KDTree
+        tree = cKDTree(coords)
+        
+        # Encontrar todos los pares de puntos dentro del radio de fusión
+        # query_pairs devuelve un conjunto de pares (i, j) con i < j
+        pairs = tree.query_pairs(r=self.merge_radius, output_type='ndarray')
+        
+        # Estructura para unión-find (disjoint sets)
+        parent = list(range(len(objects)))
+        
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]  # Compresión de camino
+                x = parent[x]
+            return x
+        
+        def union(x, y):
+            rx, ry = find(x), find(y)
+            if rx != ry:
+                # Unir (podríamos elegir el de mayor flujo como raíz, pero no es necesario)
+                parent[ry] = rx
+        
+        # Unir todos los pares cercanos
+        for i, j in pairs:
+            union(i, j)
+        
+        # Agrupar índices por su raíz
+        groups = {}
+        for idx in range(len(objects)):
+            root = find(idx)
+            groups.setdefault(root, []).append(idx)
+        
+        # Para cada grupo, elegir el objeto con mayor flujo
+        merged = []
+        for indices in groups.values():
+            best_idx = indices[np.argmax(fluxes[indices])]
+            merged.append(objects[best_idx])
+        
         return merged

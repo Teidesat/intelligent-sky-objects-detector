@@ -17,6 +17,7 @@ import torch
 from sklearn.model_selection import train_test_split
 
 sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
+sys.stdout.reconfigure(line_buffering=True)
 
 from model_training.data_preprocessing.loader import DatasetLoader
 from model_training.data_preprocessing.normalization.log_normalization import LogPercentileNormalization
@@ -25,6 +26,7 @@ from model_training.data_preprocessing.masking.circular_dynamic_masking import C
 from model_training.data_preprocessing.masking.bbox_masking import SimpleBboxMasking
 from model_training.modelling_specs.losses.dice_loss import DiceLoss
 from model_training.modelling_specs.losses.combined_loss import CombinedLoss
+from model_training.modelling_specs.losses.bce_loss import BCELoss
 from model_training.modelling_specs.losses.cross_entropy_loss import CrossEntropyLoss
 from model_training.modelling_specs.models.U_Net_3_levels import UNet3Levels
 from model_training.modelling_specs.models.U_Net_4_levels import UNet4Levels

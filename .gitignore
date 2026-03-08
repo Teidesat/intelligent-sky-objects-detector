@@ -7,3 +7,4 @@ trained-models/
 __pycache__/
 *.pyc
 .env
+data/performance/eval*/

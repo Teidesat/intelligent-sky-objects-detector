@@ -37,7 +37,7 @@ class Detector:
         normalization: NormalizationStrategy,
         target_shape: tuple = (256, 256),
     ) -> "Detector":
-        model = torch.load(str(model_path), map_location="cpu")
+        model = torch.load(str(model_path), map_location="cpu", weights_only=False)
         return cls(model, postprocessing, normalization, target_shape)
 
     def predict_mask(self, preprocessed_image: np.ndarray) -> np.ndarray:

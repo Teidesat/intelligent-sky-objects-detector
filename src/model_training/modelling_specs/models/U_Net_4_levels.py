@@ -18,8 +18,8 @@ class UNet4LevelsModule(nn.Module):
         self.dec2 = DecoderBlock(256, 128, 128)
         self.dec1 = DecoderBlock(128, 64, 64)
 
-        self.output_conv = nn.Conv2d(64, num_classes, kernel_size=1)
-        self.softmax = nn.Softmax(dim=1)
+        self.output_conv = nn.Conv2d(64, 1, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         conv1, pool1 = self.enc1(x)
@@ -34,7 +34,7 @@ class UNet4LevelsModule(nn.Module):
         x = self.dec2(x, conv2)
         x = self.dec1(x, conv1)
 
-        return self.softmax(self.output_conv(x))
+        return self.sigmoid(self.output_conv(x))
 
 
 class UNet4Levels(UNetBase):

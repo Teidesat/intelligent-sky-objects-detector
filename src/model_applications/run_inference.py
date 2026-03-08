@@ -15,6 +15,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import PowerNorm
 
+from astropy.utils.data import conf
+conf.allow_internet = False
+
 sys.path.append(str(Path(__file__).parent.parent))
 
 from model_training.data_preprocessing.normalization.log_normalization import LogPercentileNormalization

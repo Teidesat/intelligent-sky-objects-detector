@@ -51,24 +51,11 @@ class Trainer:
     def build(self) -> nn.Module:
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = True      # False
+        torch.backends.cudnn.deterministic = False   # True
 
         self.model = self.model_strategy.build(self.input_shape, self.NUM_CLASSES)
         self.model.to(self.device)
-        
-        # DEBUG — verificar que CUDA funciona
-        print(f"Device: {self.device}")
-        print(f"CUDA available: {torch.cuda.is_available()}")
-        if torch.cuda.is_available():
-            print(f"GPU: {torch.cuda.get_device_name(0)}")
-            # Test rápido en GPU
-            x = torch.randn(2, 1, 256, 256).to(self.device)
-            with torch.no_grad():
-                out = self.model(x)
-            print(f"GPU test output has nan: {torch.isnan(out).any().item()}")
-            print(f"GPU test output min: {out.min().item():.4f} max: {out.max().item():.4f}")
-        
         print(self.model)
         return self.model
 
@@ -98,14 +85,16 @@ class Trainer:
         best_val_loss = float("inf")
 
         for epoch in range(1, self.epochs + 1):
-            train_metrics = self._run_epoch(train_loader, criterion, optimizer, training=True)
-            val_metrics   = self._run_epoch(val_loader,   criterion, optimizer=None, training=False)
+            train_metrics = self._run_epoch(train_loader, criterion, optimizer, training=True, epoch=epoch)
+            val_metrics   = self._run_epoch(val_loader,  criterion, optimizer=None, training=False, epoch=epoch)
 
             self._log_epoch(epoch, train_metrics, val_metrics)
             self._update_history(history, train_metrics, val_metrics)
 
             if val_metrics["loss"] < best_val_loss:
                 best_val_loss = val_metrics["loss"]
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
                 torch.save(self.model.state_dict(), checkpoint_path)
                 print(f"  ✓ Checkpoint saved ({checkpoint_path.name})")
 
@@ -119,10 +108,6 @@ class Trainer:
         print(f"Model saved to: {path}")
         return path
 
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
     def _make_loader(
         self,
         images: torch.Tensor,
@@ -131,7 +116,6 @@ class Trainer:
     ) -> DataLoader:
         # images: (B, H, W, 1) → (B, 1, H, W)
         images_chw = images.permute(0, 3, 1, 2)
-        # masks:  (B, H, W) long — already correct
         return DataLoader(
             TensorDataset(images_chw, masks),
             batch_size=self.batch_size,
@@ -144,35 +128,23 @@ class Trainer:
         criterion: Callable,
         optimizer: optim.Optimizer | None,
         training: bool,
+        epoch = None,
     ) -> dict[str, float]:
         self.model.train(training)
         total_loss = total_acc = total_iou = 0.0
+        n = len(loader)
 
-        ctx = torch.enable_grad() if training else torch.no_grad()
-        with ctx:
+        with (torch.enable_grad() if training else torch.no_grad()):
             for imgs, masks in loader:
                 imgs, masks = imgs.to(self.device), masks.to(self.device)
 
-                # --- DEBUG: comprobar NaN en entrada ---
-                if torch.isnan(imgs).any():
-                    print("¡NaN en imágenes!")
-                    import sys; sys.exit()
-                if torch.isnan(masks).any():
-                    print("¡NaN en máscaras!")
-                    import sys; sys.exit()
-                # ---------------------------------------
+                if training:
+                    optimizer.zero_grad()
 
                 preds = self.model(imgs)                        # (B, C, H, W)
-                # --- DEBUG: comprobar NaN en salida del modelo ---
-                if torch.isnan(preds).any():
-                    print("¡NaN en predicciones!")
-                    print(f"preds min: {preds.min().item()}, max: {preds.max().item()}")
-                    import sys; sys.exit()
-                # -------------------------------------------------
                 loss  = criterion(preds.squeeze(1), masks.float())
 
                 if training:
-                    optimizer.zero_grad()
                     loss.backward()
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
                     optimizer.step()
@@ -182,7 +154,6 @@ class Trainer:
                 total_acc  += acc
                 total_iou  += iou
 
-        n = len(loader)
         return {"loss": total_loss / n, "acc": total_acc / n, "iou": total_iou / n}
 
     @staticmethod

@@ -100,6 +100,7 @@ def main():
 
     evaluator = Evaluator(detector=detector, output_dir=args.output)
     evaluator.plot_inference_grid(test_dataset, n_samples=args.samples)
+    evaluator.compute_object_detection_metrics(test_dataset, tolerance_px=5)
     evaluator.plot_dataset_sample(dataset, n_samples=args.samples)
 
 

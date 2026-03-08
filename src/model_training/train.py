@@ -28,6 +28,7 @@ from model_training.modelling_specs.losses.dice_loss import DiceLoss
 from model_training.modelling_specs.losses.combined_loss import CombinedLoss
 from model_training.modelling_specs.losses.bce_loss import BCELoss
 from model_training.modelling_specs.losses.cross_entropy_loss import CrossEntropyLoss
+from model_training.modelling_specs.losses.focal_loss import FocalLoss
 from model_training.modelling_specs.models.U_Net_3_levels import UNet3Levels
 from model_training.modelling_specs.models.U_Net_4_levels import UNet4Levels
 from model_training.trainer import Trainer
@@ -105,8 +106,9 @@ def main():
 
     # Strategies
     normalization  = LogPercentileNormalization(lowest_percentile=1.0, highest_percentile=99.0)
-    masking        = CircularDynamicMasking(flux_percentile=30, merge_radius=8, min_radius=1, max_radius=4)
-    loss           = DiceLoss()
+    masking        = CircularDynamicMasking(flux_percentile=30, merge_radius=8, min_radius=3, max_radius=8)
+    loss           = CombinedLoss(loss_a=DiceLoss(), loss_b=FocalLoss(alpha=0.25, gamma=2.0), weight_a=0.5)
+    # CombinedLoss(loss_a=DiceLoss(), loss_b=FocalLoss(alpha=0.25, gamma=2.0), weight_a=0.5)
     model_strategy = UNet3Levels()
     postprocessing = MorphologicalClosing(kernel_size=7, min_area=4.0)
 

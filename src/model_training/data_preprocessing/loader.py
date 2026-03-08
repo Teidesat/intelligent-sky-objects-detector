@@ -57,8 +57,17 @@ class DatasetLoader:
             print(f"NaN después de resize en {entry_id}, saltando entrada")
             return None
         
+        col_names = detected_objects.columns.names
+        x_col    = next((c for c in col_names if c.upper() in ("X", "X_IMAGE", "XWIN_IMAGE", "XPEAK_IMAGE")), None)
+        y_col    = next((c for c in col_names if c.upper() in ("Y", "Y_IMAGE", "YWIN_IMAGE", "YPEAK_IMAGE")), None)
+        flux_col = next((c for c in col_names if "FLUX" in c.upper()), None)
+
+        if not all([x_col, y_col, flux_col]):
+            print(f"Skipping {entry_id}: missing X/Y/FLUX columns. Available: {list(col_names)}")
+            return None
+        
         objects_info = np.stack(
-            [detected_objects["X"], detected_objects["Y"], detected_objects["FLUX"]],
+            [detected_objects[x_col], detected_objects[y_col], detected_objects[flux_col]],
             axis=-1,
         )
 

@@ -35,8 +35,8 @@ services:
     image: sky-detector
     command: >
       python -m src.model_applications.run_inference
-      --model /app/data/trained-models/model-2026_03_07-22_19_05.pt
-      --image /app/data/dataset/1544156/1544156-image.fits
+      --model /app/data/trained-models/model-2026_03_08-17_21_19.pt
+      --image /app/data/dataset/11000896/11000896-image.fits
       --output /app/data/performance/infer_result.png
     volumes:
       - ./data:/app/data
@@ -57,9 +57,9 @@ services:
     image: sky-detector
     command: >
       python -m src.model_applications.run_evaluation
-      --model /app/data/trained-models/model-2026_03_07-22_19_05.pt
+      --model /app/data/trained-models/model-2026_03_08-17_21_19.pt
       --dataset /app/data/dataset/
-      --output /app/data/performance/eval-2026_03_07-22_19_05/
+      --output /app/data/performance/eval-2026_03_08-17_21_19/
     volumes:
       - ./data:/app/data
       - ./src:/app/src

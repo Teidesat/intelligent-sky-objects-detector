@@ -121,3 +121,57 @@ class Evaluator:
         plt.show()
         print(f"Inference grid saved to: {save_path}")
         return save_path
+
+    def compute_object_detection_metrics(
+        self,
+        test_dataset: dict,
+        tolerance_px: int = 5,
+    ) -> dict:
+        """
+        Object-level detection metrics.
+        For each ground truth object, checks if the predicted mask has
+        any active pixel within tolerance_px radius → True Positive.
+        
+        Returns precision, recall, f1 at object level.
+        """
+        total_tp = total_fp = total_fn = 0
+
+        for entry in test_dataset.values():
+            mask = self.detector.predict_mask(entry.nn_input_image)
+            predicted_positions = self.detector.postprocessing.extract_positions(mask)
+            gt_objects = entry.filtered_objects  # list of (x, y, flux)
+
+            gt_points  = [(x, y) for x, y, _ in gt_objects] if gt_objects else []
+            pred_points = list(predicted_positions)
+
+            matched_gt   = set()
+            matched_pred = set()
+
+            for pi, (px, py) in enumerate(pred_points):
+                for gi, (gx, gy) in enumerate(gt_points):
+                    if gi in matched_gt:
+                        continue
+                    dist = ((px - gx) ** 2 + (py - gy) ** 2) ** 0.5
+                    if dist <= tolerance_px:
+                        matched_gt.add(gi)
+                        matched_pred.add(pi)
+                        break
+
+            tp = len(matched_gt)
+            fp = len(pred_points) - len(matched_pred)
+            fn = len(gt_points)  - len(matched_gt)
+
+            total_tp += tp
+            total_fp += fp
+            total_fn += fn
+
+        precision = total_tp / (total_tp + total_fp + 1e-6)
+        recall    = total_tp / (total_tp + total_fn + 1e-6)
+        f1        = 2 * precision * recall / (precision + recall + 1e-6)
+
+        print(f"\nObject-level detection (tolerance={tolerance_px}px):")
+        print(f"  TP: {total_tp}  FP: {total_fp}  FN: {total_fn}")
+        print(f"  Precision: {precision:.4f}  Recall: {recall:.4f}  F1: {f1:.4f}")
+
+        return {"precision": precision, "recall": recall, "f1": f1,
+                "tp": total_tp, "fp": total_fp, "fn": total_fn}

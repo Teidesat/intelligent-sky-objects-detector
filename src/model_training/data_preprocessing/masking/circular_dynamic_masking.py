@@ -13,7 +13,7 @@ class CircularDynamicMasking(MaskingStrategy):
       - Circles scaled by flux // Maybe would be better to sclae with shape, testing needed
     """
 
-    def __init__(self, flux_percentile: float = 30.0, merge_radius: int = 8, min_radius: int = 3, max_radius: int = 12,):
+    def __init__(self, flux_percentile: float = 10.0, merge_radius: int = 8, min_radius: int = 3, max_radius: int = 12,):
         self.flux_percentile = flux_percentile
         self.merge_radius = merge_radius
         self.min_radius = min_radius

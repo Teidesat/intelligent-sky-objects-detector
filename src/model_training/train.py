@@ -106,7 +106,7 @@ def main():
 
     # Strategies
     normalization  = LogPercentileNormalization(lowest_percentile=1.0, highest_percentile=99.0)
-    masking        = CircularDynamicMasking(flux_percentile=30, merge_radius=8, min_radius=3, max_radius=8)
+    masking        = CircularDynamicMasking(flux_percentile=50, merge_radius=8, min_radius=3, max_radius=8)
     loss           = CombinedLoss(loss_a=DiceLoss(), loss_b=FocalLoss(alpha=0.25, gamma=2.0), weight_a=0.5)
     # CombinedLoss(loss_a=DiceLoss(), loss_b=FocalLoss(alpha=0.25, gamma=2.0), weight_a=0.5)
     model_strategy = UNet3Levels()

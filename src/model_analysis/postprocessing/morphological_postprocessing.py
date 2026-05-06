@@ -26,7 +26,12 @@ class MorphologicalClosing(PostprocessingStrategy):
         for contour in contours:
             if cv.contourArea(contour) < self.min_area:
                 continue
-            x_coord, y_coord, width, height = cv.boundingRect(contour)
-            positions.append((x_coord + width / 2, y_coord + height / 2))
+            # Centroide por distancia euclídea, media artimética
+            M = cv.moments(contour)
+            if M['m00'] == 0:
+                continue
+            cx = M['m10'] / M['m00']
+            cy = M['m01'] / M['m00']
+            positions.append((cx, cy))
 
         return positions

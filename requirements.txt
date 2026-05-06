@@ -5,3 +5,4 @@ scikit-learn==1.6.1
 # tensorflow==2.18.0
 # torch==2.5.1
 tqdm==4.67.1
+astroquery==0.4.7

@@ -36,8 +36,8 @@ services:
     command: >
       python -m src.model_applications.run_inference
       --model /app/data/trained-models/model-2026_03_08-17_21_19.pt
-      --image /app/data/dataset/11000896/11000896-image.fits
-      --output /app/data/performance/infer_result.png
+      --image /app/data/dataset/1544642/1544642-image.fits
+      --output /app/data/performance/infer_result4.png
     volumes:
       - ./data:/app/data
       - ./src:/app/src
@@ -60,6 +60,31 @@ services:
       --model /app/data/trained-models/model-2026_03_08-17_21_19.pt
       --dataset /app/data/dataset/
       --output /app/data/performance/eval-2026_03_08-17_21_19/
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    environment:
+      - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  visibility:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_applications.run_satellite_visibility
+      --model /app/data/trained-models/model-2026_03_27-02_22_07.pt
+      --dataset /app/data/dataset/
+      --output /app/data/performance/
+      --led-lumens 8000
+      --num-leds 4
+      --sat-mag 4.2
     volumes:
       - ./data:/app/data
       - ./src:/app/src

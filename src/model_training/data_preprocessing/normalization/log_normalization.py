@@ -8,7 +8,7 @@ class LogPercentileNormalization(NormalizationStrategy):
     Sky background subtraction + logarithmic normalization
     """
 
-    def __init__(self, lowest_percentile: float = 1.0, highest_percentile: float = 99.0):
+    def __init__(self, lowest_percentile: float = 1.0, highest_percentile: float = 99.9):
         self._lowest_percentile = lowest_percentile
         self._highest_percentile = highest_percentile
 

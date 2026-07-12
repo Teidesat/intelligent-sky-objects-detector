@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import astropy.io.fits as fits
@@ -13,31 +14,62 @@ from .masking.masking_interface import MaskingStrategy
 
 
 class DatasetLoader:
-    """
-    Loads a directory of astrometry.net entries into DatasetEntry objects.
-    """
 
-    def __init__(self, normalization: NormalizationStrategy, masking: MaskingStrategy, target_shape: tuple = (256, 256), ):
+    def __init__(self, normalization: NormalizationStrategy, masking: MaskingStrategy,
+                 target_shape: tuple = (256, 256)):
         self.normalization = normalization
-        self.masking = masking
-        self.target_shape = target_shape  
+        self.masking       = masking
+        self.target_shape  = target_shape
+        # Clave de caché: cambia automáticamente al cambiar masking strategy
+        self._cache_key    = type(masking).__name__
 
     def load(self, dataset_path: Path) -> dict[str, DatasetEntry]:
+        cache_dir = dataset_path / "cache"
+        cache_dir.mkdir(exist_ok=True)
         dataset = {}
+
         for entry_path in dataset_path.iterdir():
             if not entry_path.is_dir():
-                print(f"Skipping non-directory: {entry_path}")
                 continue
-            entry = self._load_entry(entry_path)
-            if entry is not None:
-                dataset[entry.entry_id] = entry
-        print(f"\nDataset loaded: {len(dataset)} entries")
+            entry_id   = entry_path.name
+            cache_file = cache_dir / f"{entry_id}_{self._cache_key}.npy"
+            ann_path   = entry_path / f"{entry_id}-annotations.json"
+
+            # Usar caché si existe Y no está desactualizada respecto a las annotations
+            cache_valid = (
+                cache_file.exists() and
+                not (ann_path.exists() and
+                     ann_path.stat().st_mtime > cache_file.stat().st_mtime)
+            )
+
+            if cache_valid:
+                data = np.load(cache_file, allow_pickle=True).item()
+                entry = DatasetEntry(
+                    entry_id=data["entry_id"],
+                    nn_input_image=data["nn_input_image"],
+                    segmentation_mask=data["segmentation_mask"],
+                    filtered_objects=data["filtered_objects"],
+                )
+            else:
+                entry = self._load_entry(entry_path)
+                if entry is None:
+                    continue
+                np.save(cache_file, {
+                    "entry_id":          entry.entry_id,
+                    "nn_input_image":    entry.nn_input_image,
+                    "segmentation_mask": entry.segmentation_mask,
+                    "filtered_objects":  entry.filtered_objects,
+                })
+
+            dataset[entry_id] = entry
+
+        print(f"Dataset loaded: {len(dataset)} entries")
         return dataset
 
     def _load_entry(self, entry_path: Path) -> DatasetEntry | None:
         entry_id = entry_path.name
         try:
-            fits_image = self._read_fits_image(entry_path, entry_id)
+            fits_image       = self._read_fits_image(entry_path, entry_id)
             detected_objects = self._read_detected_objects(entry_path, entry_id)
         except (OSError, ValueError, TypeError) as exc:
             print(f"Skipping {entry_id}: {exc}")
@@ -49,32 +81,38 @@ class DatasetLoader:
 
         normalized = self.normalization.normalize(monochrome)
         if np.isnan(normalized).any():
-            print(f"NaN después de normalizar en {entry_id}, saltando entrada")
+            print(f"NaN después de normalizar en {entry_id}, saltando")
             return None
-        
+
         resized = cv.resize(normalized, (self.target_shape[1], self.target_shape[0]))
         if np.isnan(resized).any():
-            print(f"NaN después de resize en {entry_id}, saltando entrada")
+            print(f"NaN después de resize en {entry_id}, saltando")
             return None
-        
+
         col_names = detected_objects.columns.names
-        x_col    = next((c for c in col_names if c.upper() in ("X", "X_IMAGE", "XWIN_IMAGE", "XPEAK_IMAGE")), None)
-        y_col    = next((c for c in col_names if c.upper() in ("Y", "Y_IMAGE", "YWIN_IMAGE", "YPEAK_IMAGE")), None)
+        x_col    = next((c for c in col_names if c.upper() in
+                         ("X", "X_IMAGE", "XWIN_IMAGE", "XPEAK_IMAGE")), None)
+        y_col    = next((c for c in col_names if c.upper() in
+                         ("Y", "Y_IMAGE", "YWIN_IMAGE", "YPEAK_IMAGE")), None)
         flux_col = next((c for c in col_names if "FLUX" in c.upper()), None)
 
         if not all([x_col, y_col, flux_col]):
-            print(f"Skipping {entry_id}: missing X/Y/FLUX columns. Available: {list(col_names)}")
+            print(f"Skipping {entry_id}: missing X/Y/FLUX columns.")
             return None
-        
+
         objects_info = np.stack(
             [detected_objects[x_col], detected_objects[y_col], detected_objects[flux_col]],
             axis=-1,
         )
 
+        annotations = self._read_annotations(entry_path, entry_id)
+
         mask, filtered_objects = self.masking.build_mask(
             objects_info=objects_info,
             original_image_shape=monochrome.shape,
             target_shape=self.target_shape,
+            original_image=monochrome,
+            annotations=annotations,
         )
 
         return DatasetEntry(
@@ -83,6 +121,16 @@ class DatasetLoader:
             segmentation_mask=mask.copy(),
             filtered_objects=filtered_objects,
         )
+
+    def _read_annotations(self, entry_path: Path, entry_id: str) -> list[dict] | None:
+        ann_path = entry_path / f"{entry_id}-annotations.json"
+        if not ann_path.exists():
+            return None
+        try:
+            with open(ann_path) as f:
+                return json.load(f)
+        except Exception:
+            return None
 
     def _read_fits_image(self, entry_path: Path, entry_id: str) -> np.ndarray:
         image_path = entry_path / f"{entry_id}-image.fits"
@@ -93,7 +141,6 @@ class DatasetLoader:
         if data is None:
             raise ValueError("Empty FITS image")
         if np.isnan(data).any():
-            print(f"NaN detectado en {entry_id}-image.fits, reemplazando por 0")
             data = np.nan_to_num(data, nan=0.0)
         return data
 

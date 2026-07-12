@@ -16,7 +16,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from model_training.data_preprocessing.loader import DatasetLoader 
 from model_training.data_preprocessing.normalization.log_normalization import LogPercentileNormalization
 from model_training.data_preprocessing.masking.circular_dynamic_masking import CircularDynamicMasking
-
+from model_training.data_preprocessing.masking.annotation_masking import AnnotationMasking
 from model_analysis.detector import Detector
 from model_analysis.evaluator import Evaluator
 from model_analysis.postprocessing.morphological_postprocessing import MorphologicalClosing
@@ -78,7 +78,7 @@ def main():
 
     target_shape   = (args.shape, args.shape)
     normalization  = LogPercentileNormalization()
-    masking        = CircularDynamicMasking()
+    masking        = AnnotationMasking(radius=4, border_margin=5)
     postprocessing = MorphologicalClosing()
 
     load = DatasetLoader(normalization=normalization, masking=masking, target_shape=target_shape)
@@ -86,7 +86,7 @@ def main():
     dataset = load.load(args.dataset)
 
     items = list(dataset.items())
-    _, rest      = train_test_split(items, train_size=0.5, shuffle=True, random_state=42)
+    _, rest      = train_test_split(items, train_size=0.7, shuffle=True, random_state=42)
     test_items, _ = train_test_split(rest,  train_size=0.5, shuffle=True, random_state=42)
     test_dataset = dict(test_items)
     print(f"Test set: {len(test_dataset)} entries")

@@ -9,3 +9,4 @@ __pycache__/
 .env
 data/performance/eval*/
 data/performance/gaia_cache
+data/frigate*

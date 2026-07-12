@@ -1,0 +1,248 @@
+Loading dataset...
+Skipping 110: FITS image not found: /app/data/dataset/110/110-image.fits
+Skipping 11000012: Empty FITS image
+Skipping 11000013: Empty FITS image
+Skipping 11000042: Empty FITS image
+Skipping 11000069: Empty FITS image
+Skipping 11000088: Empty FITS image
+Skipping 11000103: Empty FITS image
+Skipping 11000109: Empty FITS image
+Skipping 11000130: Empty FITS image
+Skipping 11000149: Empty FITS image
+Skipping 11000183: Empty FITS image
+Skipping 11000206: Empty FITS image
+Skipping 11000231: Empty FITS image
+Skipping 11000248: Empty FITS image
+Skipping 11000259: Empty FITS image
+Skipping 11000278: Empty FITS image
+Skipping 11000293: Empty FITS image
+Skipping 11000318: Empty FITS image
+Skipping 11000333: Empty FITS image
+Skipping 11000348: Empty FITS image
+Skipping 11000375: Empty FITS image
+Skipping 11000410: Empty FITS image
+Skipping 11000425: Empty FITS image
+Skipping 11000448: Empty FITS image
+Skipping 11000463: Empty FITS image
+Skipping 11000480: Empty FITS image
+Skipping 11000505: Empty FITS image
+Skipping 11000513: Empty FITS image
+Skipping 11000541: Empty FITS image
+Skipping 11000560: Empty FITS image
+Skipping 11000583: Empty FITS image
+Skipping 11000601: Empty FITS image
+Skipping 11000629: Empty FITS image
+Skipping 11000652: Empty FITS image
+Skipping 11000676: Empty FITS image
+Skipping 11000723: Empty FITS image
+Skipping 11000737: Empty FITS image
+Skipping 11000750: Empty FITS image
+Skipping 11000778: Empty FITS image
+Skipping 11000803: Empty FITS image
+Skipping 11000831: Empty FITS image
+Skipping 11000834: Empty FITS image
+Skipping 11000866: Empty FITS image
+Skipping 11000868: Empty FITS image
+Skipping 11000878: Empty FITS image
+Skipping 11000880: Empty FITS image
+Skipping 11000908: Empty FITS image
+Skipping 11000909: Empty FITS image
+Skipping 11000939: Empty FITS image
+Skipping 11000941: Empty FITS image
+Skipping 11000971: Empty FITS image
+Skipping 11000998: Empty FITS image
+Skipping 11001034: Empty FITS image
+Skipping 11001048: Empty FITS image
+Skipping 11001075: Empty FITS image
+Skipping 11001103: Empty FITS image
+Skipping 11001122: Empty FITS image
+Skipping 11001138: Empty FITS image
+Skipping 11001153: Empty FITS image
+Skipping 11001182: Empty FITS image
+Skipping 11001206: Empty FITS image
+Skipping 11001236: Empty FITS image
+Skipping 11001243: Empty FITS image
+Skipping 11001261: Empty FITS image
+Skipping 11001293: Empty FITS image
+Skipping 11001312: Empty FITS image
+Skipping 11001341: Empty FITS image
+Skipping 11001352: Empty FITS image
+Skipping 11001381: Empty FITS image
+Skipping 11001415: Empty FITS image
+Skipping 11001433: Empty FITS image
+Skipping 11001465: Empty FITS image
+WARNING: File may have been truncated: actual file length (114688) is smaller than the expected size (4360320) [astropy.io.fits.file]
+Skipping 1544015: buffer is too small for requested array
+WARNING: File may have been truncated: actual file length (2208960) is smaller than the expected size (2211840) [astropy.io.fits.file]
+Skipping 1544965: buffer is too small for requested array
+WARNING: File may have been truncated: actual file length (16963200) is smaller than the expected size (16966080) [astropy.io.fits.file]
+Skipping 1545008: buffer is too small for requested array
+Skipping 1545510: AXY file not found: /app/data/dataset/1545510/1545510-axy.fits
+NaN después de normalizar en 1545519, saltando
+Skipping 1545994: Empty FITS image
+Skipping 1546048: Empty FITS image
+Skipping 1546051: Empty FITS image
+Skipping 1546056: Empty FITS image
+Skipping 1546104: Empty FITS image
+Skipping 1546107: Empty FITS image
+Skipping 1546125: Empty FITS image
+Skipping 1546130: Empty FITS image
+Skipping 1546168: Empty FITS image
+Skipping 1546224: Empty FITS image
+Skipping 1546226: Empty FITS image
+Skipping 1546232: Empty FITS image
+Skipping 1546271: Empty FITS image
+Skipping 1546307: Empty FITS image
+Skipping 1546343: Empty FITS image
+Skipping 1546346: Empty FITS image
+WARNING: File may have been truncated: actual file length (671040) is smaller than the expected size (673920) [astropy.io.fits.file]
+Skipping 1547405: buffer is too small for requested array
+Skipping 1547958: Empty FITS image
+Skipping 1547963: Empty FITS image
+Skipping 1548078: Empty FITS image
+WARNING: File may have been truncated: actual file length (6512640) is smaller than the expected size (7948800) [astropy.io.fits.file]
+Skipping 1548240: buffer is too small for requested array
+Skipping 27: FITS image not found: /app/data/dataset/27/27-image.fits
+Skipping cache: FITS image not found: /app/data/dataset/cache/cache-image.fits
+Dataset loaded: 2806 entries
+
+==================================================
+EXPERIMENT CONFIGURATION
+==================================================
+NORMALIZATION  : LogPercentileNormalization
+                 {'lowest_percentile': 1.0, 'highest_percentile': 99.9}
+LOSS           : CombinedLoss
+                 {'loss_a': 'DiceLoss', 'loss_b': 'FocalLossModule', 'weight_a': 0.5, 'weight_b': 0.5}
+MODEL          : UNet3Levels
+                 {'prior_prob': 0.008}
+AUGMENTATION   : FlipRotateAugmentation
+                 {'use_flips': True, 'use_rotations': True}
+MASKING        : AnnotationMasking
+                 {'radius': 6, 'border_margin': 5}
+==================================================
+
+Train: 1014 con estrellas + 285/950 vacías mantenidas
+Train: 1299 | Test: 421 | Val: 421
+Densidad positivos: 0.2337%
+IoU perfecto (0 FP): 1.0000 → 1.0
+IoU con 1% FP adicional: 0.1895
+IoU con 0.5% FP adicional: 0.3186
+train_images: torch.Size([1299, 256, 256, 1])
+train_masks: torch.Size([1299, 256, 256])
+Valores únicos train_masks: tensor([0, 1])
+Pixels estrella train: 300475
+Valores únicos val_masks: tensor([0, 1])
+Pixels estrella val: 64490
+Imágenes con estrellas: 1014/1299
+Train star pixels: 300475 / 85131264 = 0.3530%
+Val   star pixels: 64490   / 27590656   = 0.2337%
+Tamaño train: 1299
+Tamaño val: 421
+Train mask unique: [0, 1]
+UNet3LevelsModule(
+  (enc1): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (enc2): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (enc3): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (bridge): ConvBlock(
+    (block): Sequential(
+      (0): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): GroupNorm(8, 512, eps=1e-05, affine=True)
+      (2): ReLU(inplace=True)
+      (3): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (4): GroupNorm(8, 512, eps=1e-05, affine=True)
+      (5): ReLU(inplace=True)
+    )
+  )
+  (dec3): DecoderBlock(
+    (upsample): ConvTranspose2d(512, 256, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(512, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (dec2): DecoderBlock(
+    (upsample): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (dec1): DecoderBlock(
+    (upsample): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (output_conv): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  (final_activation): Sigmoid()
+)
+Epoch   1/150 [1m 21.44s]
+  TRAIN  loss: 0.4191  iou: 0.1152  f1: 0.1971  prec: 0.3230  rec: 0.2678  spec: 0.9962
+  VAL    loss: 0.4524  iou: 0.0610  f1: 0.1120  prec: 0.0766  rec: 0.3708  spec: 0.9921
+  ✓ Checkpoint saved (model-2026_07_09-18_57_27.ckpt.pt)
+  LR: 1.00e-03
+Epoch   2/150 [55.67s]
+  TRAIN  loss: 0.3737  iou: 0.1765  f1: 0.2930  prec: 0.3249  rec: 0.3410  spec: 0.9978
+  VAL    loss: 0.4076  iou: 0.1486  f1: 0.2523  prec: 0.2226  rec: 0.4348  spec: 0.9976
+  ✓ Checkpoint saved (model-2026_07_09-18_57_27.ckpt.pt)
+  LR: 1.00e-03
+Epoch   3/150 [55.89s]
+  TRAIN  loss: 0.3499  iou: 0.2055  f1: 0.3338  prec: 0.3737  rec: 0.3717  spec: 0.9983
+  VAL    loss: 0.4000  iou: 0.1603  f1: 0.2680  prec: 0.2750  rec: 0.3733  spec: 0.9985
+  ✓ Checkpoint saved (model-2026_07_09-18_57_27.ckpt.pt)
+  LR: 1.00e-03

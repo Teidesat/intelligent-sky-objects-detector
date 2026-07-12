@@ -1,0 +1,287 @@
+Loading dataset...
+Skipping 110: FITS image not found: /app/data/dataset/110/110-image.fits
+Skipping 11000012: Empty FITS image
+Skipping 11000013: Empty FITS image
+Skipping 11000042: Empty FITS image
+Skipping 11000069: Empty FITS image
+Skipping 11000088: Empty FITS image
+Skipping 11000103: Empty FITS image
+Skipping 11000109: Empty FITS image
+Skipping 11000130: Empty FITS image
+Skipping 11000149: Empty FITS image
+Skipping 11000183: Empty FITS image
+Skipping 11000206: Empty FITS image
+Skipping 11000231: Empty FITS image
+Skipping 11000248: Empty FITS image
+Skipping 11000259: Empty FITS image
+Skipping 11000278: Empty FITS image
+Skipping 11000293: Empty FITS image
+Skipping 11000318: Empty FITS image
+Skipping 11000333: Empty FITS image
+Skipping 11000348: Empty FITS image
+Skipping 11000375: Empty FITS image
+Skipping 11000410: Empty FITS image
+Skipping 11000425: Empty FITS image
+Skipping 11000448: Empty FITS image
+Skipping 11000463: Empty FITS image
+Skipping 11000480: Empty FITS image
+Skipping 11000505: Empty FITS image
+Skipping 11000513: Empty FITS image
+Skipping 11000541: Empty FITS image
+Skipping 11000560: Empty FITS image
+Skipping 11000583: Empty FITS image
+Skipping 11000601: Empty FITS image
+Skipping 11000629: Empty FITS image
+Skipping 11000652: Empty FITS image
+Skipping 11000676: Empty FITS image
+Skipping 11000723: Empty FITS image
+Skipping 11000737: Empty FITS image
+Skipping 11000750: Empty FITS image
+Skipping 11000778: Empty FITS image
+Skipping 11000803: Empty FITS image
+Skipping 11000831: Empty FITS image
+Skipping 11000834: Empty FITS image
+Skipping 11000866: Empty FITS image
+Skipping 11000868: Empty FITS image
+Skipping 11000878: Empty FITS image
+Skipping 11000880: Empty FITS image
+Skipping 11000908: Empty FITS image
+Skipping 11000909: Empty FITS image
+Skipping 11000939: Empty FITS image
+Skipping 11000941: Empty FITS image
+Skipping 11000971: Empty FITS image
+Skipping 11000998: Empty FITS image
+Skipping 11001034: Empty FITS image
+Skipping 11001048: Empty FITS image
+Skipping 11001075: Empty FITS image
+Skipping 11001103: Empty FITS image
+Skipping 11001122: Empty FITS image
+Skipping 11001138: Empty FITS image
+Skipping 11001153: Empty FITS image
+Skipping 11001182: Empty FITS image
+Skipping 11001206: Empty FITS image
+Skipping 11001236: Empty FITS image
+Skipping 11001243: Empty FITS image
+Skipping 11001261: Empty FITS image
+Skipping 11001293: Empty FITS image
+Skipping 11001312: Empty FITS image
+Skipping 11001341: Empty FITS image
+Skipping 11001352: Empty FITS image
+Skipping 11001381: Empty FITS image
+Skipping 11001415: Empty FITS image
+Skipping 11001433: Empty FITS image
+Skipping 11001465: Empty FITS image
+WARNING: File may have been truncated: actual file length (114688) is smaller than the expected size (4360320) [astropy.io.fits.file]
+Skipping 1544015: buffer is too small for requested array
+WARNING: File may have been truncated: actual file length (2208960) is smaller than the expected size (2211840) [astropy.io.fits.file]
+Skipping 1544965: buffer is too small for requested array
+WARNING: File may have been truncated: actual file length (16963200) is smaller than the expected size (16966080) [astropy.io.fits.file]
+Skipping 1545008: buffer is too small for requested array
+Skipping 1545510: AXY file not found: /app/data/dataset/1545510/1545510-axy.fits
+NaN después de normalizar en 1545519, saltando
+Skipping 1545994: Empty FITS image
+Skipping 1546048: Empty FITS image
+Skipping 1546051: Empty FITS image
+Skipping 1546056: Empty FITS image
+Skipping 1546104: Empty FITS image
+Skipping 1546107: Empty FITS image
+Skipping 1546125: Empty FITS image
+Skipping 1546130: Empty FITS image
+Skipping 1546168: Empty FITS image
+Skipping 1546224: Empty FITS image
+Skipping 1546226: Empty FITS image
+Skipping 1546232: Empty FITS image
+Skipping 1546271: Empty FITS image
+Skipping 1546307: Empty FITS image
+Skipping 1546343: Empty FITS image
+Skipping 1546346: Empty FITS image
+WARNING: File may have been truncated: actual file length (671040) is smaller than the expected size (673920) [astropy.io.fits.file]
+Skipping 1547405: buffer is too small for requested array
+Skipping 1547958: Empty FITS image
+Skipping 1547963: Empty FITS image
+Skipping 1548078: Empty FITS image
+WARNING: File may have been truncated: actual file length (6512640) is smaller than the expected size (7948800) [astropy.io.fits.file]
+Skipping 1548240: buffer is too small for requested array
+Skipping 27: FITS image not found: /app/data/dataset/27/27-image.fits
+Skipping cache: FITS image not found: /app/data/dataset/cache/cache-image.fits
+Dataset loaded: 2806 entries
+
+==================================================
+EXPERIMENT CONFIGURATION
+==================================================
+NORMALIZATION  : LogPercentileNormalization
+                 {'lowest_percentile': 1.0, 'highest_percentile': 99.9}
+LOSS           : CombinedLoss
+                 {'loss_a': 'DiceLoss', 'loss_b': 'FocalLossModule', 'weight_a': 0.5, 'weight_b': 0.5}
+MODEL          : UNet4Levels
+                 {'prior_prob': 0.0035}
+AUGMENTATION   : ComposeAugmentation
+                 {'augmentations': [<model_training.data_preprocessing.augmentation.flip_rotate_augmentation.FlipRotateAugmentation object at 0x7a2c68c57df0>, <model_training.data_preprocessing.augmentation.brightness_contrast_augmentation.BrightnessContrastAugmentation object at 0x7a2b8e137c70>, <model_training.data_preprocessing.augmentation.elastic_deformation_augmentation.ElasticDeformationAugmentation object at 0x7a2b8e137b20>]}
+MASKING        : AnnotationMasking
+                 {'radius': 8, 'border_margin': 5}
+==================================================
+
+Train: 1014 con estrellas + 285/950 vacías mantenidas
+Train: 1299 | Test: 421 | Val: 421
+train_images: torch.Size([1299, 256, 256, 1])
+train_masks: torch.Size([1299, 256, 256])
+Valores únicos train_masks: tensor([0, 1])
+Pixels estrella train: 300475
+Valores únicos val_masks: tensor([0, 1])
+Pixels estrella val: 64490
+Imágenes con estrellas: 1014/1299
+Train star pixels: 300475 / 85131264 = 0.3530%
+Val   star pixels: 64490   / 27590656   = 0.2337%
+Tamaño train: 1299
+Tamaño val: 421
+Train mask unique: [0, 1]
+UNet4LevelsModule(
+  (enc1): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (enc2): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (enc3): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (enc4): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 512, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 512, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (bridge): ConvBlock(
+    (block): Sequential(
+      (0): Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): GroupNorm(8, 1024, eps=1e-05, affine=True)
+      (2): ReLU(inplace=True)
+      (3): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (4): GroupNorm(8, 1024, eps=1e-05, affine=True)
+      (5): ReLU(inplace=True)
+    )
+  )
+  (dec4): DecoderBlock(
+    (upsample): ConvTranspose2d(1024, 512, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(1024, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 512, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 512, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (dec3): DecoderBlock(
+    (upsample): ConvTranspose2d(512, 256, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(512, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (dec2): DecoderBlock(
+    (upsample): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (dec1): DecoderBlock(
+    (upsample): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (output_conv): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  (final_activation): Sigmoid()
+)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/app/src/model_training/train.py", line 229, in <module>
+    main()
+  File "/app/src/model_training/train.py", line 210, in main
+    history = trainer.train(train_images, train_masks, val_images, val_masks)
+  File "/app/src/model_training/trainer.py", line 102, in train
+    train_metrics = self._run_epoch(train_loader, criterion, optimizer, training=True, epoch=epoch)
+  File "/app/src/model_training/trainer.py", line 178, in _run_epoch
+    for imgs, masks in loader:
+  File "/usr/local/lib/python3.10/dist-packages/torch/utils/data/dataloader.py", line 741, in __next__
+    data = self._next_data()
+  File "/usr/local/lib/python3.10/dist-packages/torch/utils/data/dataloader.py", line 801, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/usr/local/lib/python3.10/dist-packages/torch/utils/data/_utils/fetch.py", line 54, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/usr/local/lib/python3.10/dist-packages/torch/utils/data/_utils/fetch.py", line 54, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/app/src/model_training/data_preprocessing/augmentation/segmentation_dataset.py", line 19, in __getitem__
+    image, mask = self.augmentation(image, mask)
+  File "/app/src/model_training/data_preprocessing/augmentation/compose_augmentation.py", line 14, in __call__
+    image, mask = aug(image, mask)
+  File "/app/src/model_training/data_preprocessing/augmentation/elastic_deformation_augmentation.py", line 39, in __call__
+    return self._apply_elastic(image, mask)
+  File "/app/src/model_training/data_preprocessing/augmentation/elastic_deformation_augmentation.py", line 94, in _apply_elastic
+    deformed_img = F.grid_sample(img_reshaped, grid, mode='bilinear', padding_mode='border', align_corners=False)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/functional.py", line 5242, in grid_sample
+    return torch.grid_sampler(input, grid, mode_enum, padding_mode_enum, align_corners)
+RuntimeError: grid_sampler(): expected 4D input and grid with same number of dimensions, but got input with sizes [1, 1, 256, 256] and grid with sizes [1, 1, 256, 256, 2]

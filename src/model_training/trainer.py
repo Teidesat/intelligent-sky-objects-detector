@@ -1,6 +1,7 @@
+import time
 from datetime import datetime
 from pathlib import Path
-from typing import Callable
+import json
 
 import torch
 import torch.nn as nn
@@ -9,6 +10,8 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from .modelling_specs.models.models_interface import ModelStrategy
 from .modelling_specs.losses.losses_interface import LossStrategy
+from .data_preprocessing.augmentation.augmentation_interface import AugmentationStrategy
+from .data_preprocessing.augmentation.segmentation_dataset import SegmentationDataset
 
 
 class History:
@@ -26,21 +29,21 @@ class History:
 class Trainer:
     """Model construction, compilation, and training loop."""
 
-    NUM_CLASSES = 1
-
     def __init__(
         self,
         model_strategy: ModelStrategy,
         loss_strategy: LossStrategy,
         input_shape: tuple,
         output_dir: Path,
+        augmentation_strategy: AugmentationStrategy | None = None,
         batch_size: int = 6,
-        epochs: int = 50,
+        epochs: int = 100,
     ):
         self.model_strategy = model_strategy
         self.loss_strategy = loss_strategy
         self.input_shape = input_shape          # (H, W, C)
         self.output_dir = Path(output_dir)
+        self.augmentation_strategy = augmentation_strategy
         self.batch_size = batch_size
         self.epochs = epochs
         self.model: nn.Module | None = None
@@ -53,10 +56,14 @@ class Trainer:
     def build(self) -> nn.Module:
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
-        torch.backends.cudnn.benchmark = True      # False
-        torch.backends.cudnn.deterministic = False   # True
+        torch.backends.cudnn.benchmark = True     
+        torch.backends.cudnn.deterministic = False   
 
-        self.model = self.model_strategy.build(self.input_shape, self.NUM_CLASSES)
+        self.model = self.model_strategy.build(
+            self.input_shape, 
+            self.loss_strategy.output_channels,
+            apply_activation=self.loss_strategy.needs_activation,
+        )
         self.model.to(self.device)
         print(self.model)
         return self.model
@@ -80,84 +87,88 @@ class Trainer:
         criterion = self.loss_strategy.get_loss()
         if isinstance(criterion, nn.Module):
             criterion = criterion.to(self.device)
-
+        # 1e-4 para lovasz y tversky, 1e-3 para BCE y Dice. 1e-3 es el default de Adam.
         optimizer = optim.Adam(self.model.parameters(), lr=1e-3, weight_decay=1e-4)
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode='min', factor=0.5, patience=5, min_lr=1e-6
+            optimizer, mode='max', factor=0.5, patience=10, min_lr=1e-6 # 1e-6
         )
 
         history = History()
-        best_val_loss = float("inf")
+        best_val_iou = 0.0
 
         for epoch in range(1, self.epochs + 1):
+            epoch_start_time = time.time()
+
             train_metrics = self._run_epoch(train_loader, criterion, optimizer, training=True, epoch=epoch)
             val_metrics   = self._run_epoch(val_loader,  criterion, optimizer=None, training=False, epoch=epoch)
+            
+            epoch_end_time = time.time()
+            epoch_duration = epoch_end_time - epoch_start_time
+    
+            # Formatear el tiempo en minutos y segundos
+            minutes = int(epoch_duration // 60)
+            seconds = epoch_duration % 60
+            if minutes > 0:
+                epoch_time_str = f"{minutes}m {seconds:.2f}s"
+            else:
+                epoch_time_str = f"{seconds:.2f}s"
 
-            self._log_epoch(epoch, train_metrics, val_metrics)
+            self._log_epoch(epoch, train_metrics, val_metrics, epoch_time=epoch_time_str)
             self._update_history(history, train_metrics, val_metrics)
 
-            if val_metrics["loss"] < best_val_loss:
-                best_val_loss = val_metrics["loss"]
+            if val_metrics["iou"] > best_val_iou:  
+                best_val_iou = val_metrics["iou"]
                 if torch.cuda.is_available():
                     torch.cuda.synchronize()
                 torch.save(self.model.state_dict(), checkpoint_path)
                 print(f"  ✓ Checkpoint saved ({checkpoint_path.name})")
-                
-            scheduler.step(val_metrics["loss"]) 
+
+            scheduler.step(val_metrics["iou"])
             print(f"  LR: {optimizer.param_groups[0]['lr']:.2e}")
+
+        config = {
+            "model": self.model_strategy.__class__.__name__,
+            "loss": self.loss_strategy.__class__.__name__,
+            "loss_params": self.loss_strategy.__dict__,
+            "augmentation": self.augmentation_strategy.__class__.__name__ if self.augmentation_strategy else None,
+            "batch_size": self.batch_size,
+            "epochs": self.epochs,
+            "input_shape": self.input_shape,
+            "device": str(self.device),
+            "timestamp": datetime.now().isoformat(),
+        }
+        self._save_experiment_logs(history, config)
+
         return history
 
     def save(self) -> Path:
         if self.model is None:
             raise RuntimeError("No model to save")
         path = self.output_dir / f"model-{self._timestamp()}.pt"
-        torch.save(self.model, str(path))
+        checkpoint = {
+            "model": self.model,
+            "output_channels": self.loss_strategy.output_channels,
+            "needs_activation": self.loss_strategy.needs_activation,
+        }
+        torch.save(checkpoint, str(path))
         print(f"Model saved to: {path}")
         return path
 
-    def _make_loader(
-        self,
-        images: torch.Tensor,
-        masks: torch.Tensor,
-        shuffle: bool,
-        training=False
-    ) -> DataLoader:
-        # images: (B, H, W, 1) → (B, 1, H, W)
-        images_chw = images.permute(0, 3, 1, 2)
-        if training:
-            images_chw, masks = self._augment(images_chw, masks)
-        return DataLoader(
-            TensorDataset(images_chw, masks),
-            batch_size=self.batch_size,
-            shuffle=shuffle,
+    def _make_loader(self, images, masks, shuffle: bool, training=False) -> DataLoader:
+        dataset = SegmentationDataset(
+            images,
+            masks,
+            augmentation=self.augmentation_strategy if training else None
         )
 
-    @staticmethod
-    def _augment(images, masks):
-        augmented_images, augmented_masks = [images], [masks]
-        
-        # Flip horizontal
-        augmented_images.append(torch.flip(images, dims=[3]))
-        augmented_masks.append(torch.flip(masks, dims=[2]))
-        
-        # Flip vertical
-        augmented_images.append(torch.flip(images, dims=[2]))
-        augmented_masks.append(torch.flip(masks, dims=[1]))
-        
-        # Flip ambos
-        augmented_images.append(torch.flip(images, dims=[2, 3]))
-        augmented_masks.append(torch.flip(masks, dims=[1, 2]))
-        
-        return torch.cat(augmented_images), torch.cat(augmented_masks)
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=shuffle,
+            pin_memory=True,
+        )
 
-    def _run_epoch(
-        self,
-        loader: DataLoader,
-        criterion: Callable,
-        optimizer: optim.Optimizer | None,
-        training: bool,
-        epoch = None,
-    ) -> dict[str, float]:
+    def _run_epoch(self, loader, criterion, optimizer, training, epoch=None) -> dict[str, float]:
         self.model.train(training)
         total_loss = total_acc = total_iou = 0.0
         total_precision = total_recall = total_specificity = total_f1 = 0.0
@@ -170,15 +181,18 @@ class Trainer:
                 if training:
                     optimizer.zero_grad()
 
-                preds = self.model(imgs)                        # (B, C, H, W)
-                loss  = criterion(preds.squeeze(1), masks.float())
+                preds = self.model(imgs)  # (B, C, H, W) — C según loss_strategy
+                preds_for_loss   = self.loss_strategy.format_predictions(preds)
+                targets_for_loss = self.loss_strategy.format_targets(masks)
+                loss = criterion(preds_for_loss, targets_for_loss)
 
                 if training:
                     loss.backward()
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
                     optimizer.step()
 
-                metrics = self._compute_metrics(preds.detach(), masks)
+                probs = self.loss_strategy.predictions_to_probability(preds.detach())  # (B,H,W) en [0,1]
+                metrics = self._compute_metrics(probs, masks)
                 total_loss        += loss.item()
                 total_acc         += metrics["acc"]
                 total_iou         += metrics["iou"]
@@ -188,20 +202,16 @@ class Trainer:
                 total_f1          += metrics["f1"]
 
         return {
-            "loss":        total_loss        / n,
-            "acc":         total_acc         / n,
-            "iou":         total_iou         / n,
-            "precision":   total_precision   / n,
-            "recall":      total_recall      / n,
-            "specificity": total_specificity / n,
-            "f1":          total_f1          / n,
+            "loss": total_loss / n, "acc": total_acc / n, "iou": total_iou / n,
+            "precision": total_precision / n, "recall": total_recall / n,
+            "specificity": total_specificity / n, "f1": total_f1 / n,
         }
 
     @staticmethod
     def _compute_metrics(
         y_pred: torch.Tensor,
         y_true: torch.Tensor,
-    ) -> tuple[float, float]:
+    ) -> dict[str, float]:
         """
         Binary segmentation metrics from sigmoid single-channel output.
         - accuracy:    (TP + TN) / total
@@ -211,7 +221,7 @@ class Trainer:
         - f1:          media armónica de precision y recall
         - iou:         TP / (TP + FP + FN)
         """
-        pred_bin = (y_pred[:, 0] > 0.5).float()
+        pred_bin = (y_pred > 0.3).float()
         true     = y_true.float()
 
         tp = (pred_bin * true).sum().item()
@@ -237,9 +247,10 @@ class Trainer:
         epoch: int,
         train: dict[str, float],
         val: dict[str, float],
+        epoch_time: str,
     ) -> None:
         print(
-            f"Epoch {epoch:>3}/{self.epochs}\n"
+            f"Epoch {epoch:>3}/{self.epochs} [{epoch_time}]\n"
             f"  TRAIN  loss: {train['loss']:.4f}  iou: {train['iou']:.4f}  f1: {train['f1']:.4f}"
             f"  prec: {train['precision']:.4f}  rec: {train['recall']:.4f}  spec: {train['specificity']:.4f}\n"
             f"  VAL    loss: {val['loss']:.4f}  iou: {val['iou']:.4f}  f1: {val['f1']:.4f}"
@@ -259,3 +270,24 @@ class Trainer:
     @staticmethod
     def _timestamp() -> str:
         return datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
+    
+    def _save_experiment_logs(self, history: History, config: dict):
+        """Guarda el historial de métricas y la configuración en JSON."""
+        # Crear carpeta de logs si no existe
+        log_dir = self.output_dir / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Usar el timestamp del checkpoint para nombrar los archivos
+        timestamp = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
+        
+        # Guardar historial (métricas por época)
+        history_path = log_dir / f"history_{timestamp}.json"
+        with open(history_path, "w") as f:
+            json.dump(history.history, f, indent=2)
+        print(f"  ✓ History saved to: {history_path}")
+        
+        # Guardar configuración del experimento
+        config_path = log_dir / f"config_{timestamp}.json"
+        with open(config_path, "w") as f:
+            json.dump(config, f, indent=2, default=str)  # default=str para manejar objetos no serializables
+        print(f"  ✓ Config saved to: {config_path}")

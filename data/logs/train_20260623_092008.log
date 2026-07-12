@@ -1,0 +1,135 @@
+Loading dataset...
+Skipping 110: FITS image not found: /app/data/dataset/110/110-image.fits
+Skipping 11000012: Empty FITS image
+Skipping 11000013: Empty FITS image
+Skipping 11000042: Empty FITS image
+Skipping 11000069: Empty FITS image
+Skipping 11000088: Empty FITS image
+Skipping 11000103: Empty FITS image
+Skipping 11000109: Empty FITS image
+Skipping 11000130: Empty FITS image
+Skipping 11000149: Empty FITS image
+Skipping 11000183: Empty FITS image
+Skipping 11000206: Empty FITS image
+Skipping 11000231: Empty FITS image
+Skipping 11000248: Empty FITS image
+Skipping 11000259: Empty FITS image
+Skipping 11000278: Empty FITS image
+Skipping 11000293: Empty FITS image
+Skipping 11000318: Empty FITS image
+Skipping 11000333: Empty FITS image
+Skipping 11000348: Empty FITS image
+Skipping 11000375: Empty FITS image
+Skipping 11000410: Empty FITS image
+Skipping 11000425: Empty FITS image
+Skipping 11000448: Empty FITS image
+Skipping 11000463: Empty FITS image
+Skipping 11000480: Empty FITS image
+Skipping 11000505: Empty FITS image
+Skipping 11000513: Empty FITS image
+Skipping 11000541: Empty FITS image
+Skipping 11000560: Empty FITS image
+Skipping 11000583: Empty FITS image
+Skipping 11000601: Empty FITS image
+Skipping 11000629: Empty FITS image
+Skipping 11000652: Empty FITS image
+Skipping 11000676: Empty FITS image
+Skipping 11000723: Empty FITS image
+Skipping 11000737: Empty FITS image
+Skipping 11000750: Empty FITS image
+Skipping 11000778: Empty FITS image
+Skipping 11000803: Empty FITS image
+Skipping 11000831: Empty FITS image
+Skipping 11000834: Empty FITS image
+Skipping 11000866: Empty FITS image
+Skipping 11000868: Empty FITS image
+Skipping 11000878: Empty FITS image
+Skipping 11000880: Empty FITS image
+Skipping 11000908: Empty FITS image
+Skipping 11000909: Empty FITS image
+Skipping 11000939: Empty FITS image
+Skipping 11000941: Empty FITS image
+Skipping 11000971: Empty FITS image
+Skipping 11000998: Empty FITS image
+Skipping 11001034: Empty FITS image
+Skipping 11001048: Empty FITS image
+Skipping 11001075: Empty FITS image
+Skipping 11001103: Empty FITS image
+Skipping 11001122: Empty FITS image
+Skipping 11001138: Empty FITS image
+Skipping 11001153: Empty FITS image
+Skipping 11001182: Empty FITS image
+Skipping 11001206: Empty FITS image
+Skipping 11001236: Empty FITS image
+Skipping 11001243: Empty FITS image
+Skipping 11001261: Empty FITS image
+Skipping 11001293: Empty FITS image
+Skipping 11001312: Empty FITS image
+Skipping 11001341: Empty FITS image
+Skipping 11001352: Empty FITS image
+Skipping 11001381: Empty FITS image
+Skipping 11001415: Empty FITS image
+Skipping 11001433: Empty FITS image
+Skipping 11001465: Empty FITS image
+WARNING: File may have been truncated: actual file length (114688) is smaller than the expected size (4360320) [astropy.io.fits.file]
+Skipping 1544015: buffer is too small for requested array
+WARNING: File may have been truncated: actual file length (2208960) is smaller than the expected size (2211840) [astropy.io.fits.file]
+Skipping 1544965: buffer is too small for requested array
+WARNING: File may have been truncated: actual file length (16963200) is smaller than the expected size (16966080) [astropy.io.fits.file]
+Skipping 1545008: buffer is too small for requested array
+Skipping 1545510: AXY file not found: /app/data/dataset/1545510/1545510-axy.fits
+NaN después de normalizar en 1545519, saltando
+Skipping 1545994: Empty FITS image
+Skipping 1546048: Empty FITS image
+Skipping 1546051: Empty FITS image
+Skipping 1546056: Empty FITS image
+Skipping 1546104: Empty FITS image
+Skipping 1546107: Empty FITS image
+Skipping 1546125: Empty FITS image
+Skipping 1546130: Empty FITS image
+Skipping 1546168: Empty FITS image
+Skipping 1546224: Empty FITS image
+Skipping 1546226: Empty FITS image
+Skipping 1546232: Empty FITS image
+Skipping 1546271: Empty FITS image
+Skipping 1546307: Empty FITS image
+Skipping 1546343: Empty FITS image
+Skipping 1546346: Empty FITS image
+WARNING: File may have been truncated: actual file length (671040) is smaller than the expected size (673920) [astropy.io.fits.file]
+Skipping 1547405: buffer is too small for requested array
+Skipping 1547958: Empty FITS image
+Skipping 1547963: Empty FITS image
+Skipping 1548078: Empty FITS image
+WARNING: File may have been truncated: actual file length (6512640) is smaller than the expected size (7948800) [astropy.io.fits.file]
+Skipping 1548240: buffer is too small for requested array
+Skipping 27: FITS image not found: /app/data/dataset/27/27-image.fits
+Skipping cache: FITS image not found: /app/data/dataset/cache/cache-image.fits
+Dataset loaded: 2806 entries
+
+==================================================
+EXPERIMENT CONFIGURATION
+==================================================
+NORMALIZATION  : LogPercentileNormalization
+                 {'lowest_percentile': 1.0, 'highest_percentile': 99.9}
+LOSS           : CombinedLoss
+                 {'loss_a': 'DiceLoss', 'loss_b': 'FocalLossModule', 'weight_a': 0.5, 'weight_b': 0.5}
+MODEL          : UNet3Levels
+                 {'prior_prob': 0.008}
+AUGMENTATION   : FlipRotateAugmentation
+                 {'use_flips': True, 'use_rotations': True}
+MASKING        : AnnotationMasking
+                 {'radius': 6, 'border_margin': 5}
+==================================================
+
+Train: 1014 con estrellas + 285/950 vacías mantenidas
+Train: 1299 | Test: 421 | Val: 421
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/app/src/model_training/train.py", line 250, in <module>
+    main()
+  File "/app/src/model_training/train.py", line 183, in main
+    theoretical_max_iou(val_masks)
+UnboundLocalError: local variable 'val_masks' referenced before assignment

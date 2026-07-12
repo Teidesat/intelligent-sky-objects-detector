@@ -1,24 +1,28 @@
 from abc import ABC, abstractmethod
-
 import numpy as np
 
 
 class MaskingStrategy(ABC):
-    """Base class for all segmentation mask creation strategies"""
 
     @abstractmethod
-    def build_mask(self, objects_info: np.ndarray, original_image_shape: tuple, 
-                   target_shape: tuple,) -> tuple[np.ndarray, list]:
+    def build_mask(
+        self,
+        objects_info: np.ndarray,
+        original_image_shape: tuple,
+        target_shape: tuple,
+        original_image: np.ndarray | None = None,
+        annotations: list[dict] | None = None,
+    ) -> tuple[np.ndarray, list]:
         """
-        Build a binary segmentation mask from detected object info.
-
         Args:
-            objects_info: Array of shape (N, 3) with columns [X, Y, FLUX].
-            original_image_shape: (H, W) of the image before resizing.
-            target_shape: (H, W) of the resized image the mask must match.
-
+            objects_info:         (N, 3) [X, Y, FLUX] del .axy.
+            original_image_shape: (H, W) antes de resize.
+            target_shape:         (H, W) destino.
+            original_image:       float32 (H, W), opcional.
+            annotations:          lista de dicts de astrometry.net/api/jobs/ID/annotations/
+                                  ya filtrados a STAR_TYPES. Opcional.
         Returns:
-            mask: uint8 array of shape target_shape (0=background, 1=object).
-            filtered_objects: list of (x, y, flux) tuples that passed filtering.
+            mask:             uint8 (target_shape), 0=fondo 1=estrella.
+            filtered_objects: lista de (x, y, flux).
         """
         ...

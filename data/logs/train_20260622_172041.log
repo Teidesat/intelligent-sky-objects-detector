@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/app/src/model_training/train.py", line 47, in <module>
+    from model_training.data_preprocessing.augmentation.elastic_deformation_augmentation import ElasticDeformationAugmentation
+ImportError: cannot import name 'ElasticDeformationAugmentation' from 'model_training.data_preprocessing.augmentation.elastic_deformation_augmentation' (/app/src/model_training/data_preprocessing/augmentation/elastic_deformation_augmentation.py)

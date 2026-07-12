@@ -3,8 +3,8 @@
 run_satellite_visibility.py — Satellite visibility analysis with GAIA DR3 cross-match.
 
 Strategy:
-  1. PRIMARY  — read rdls.fits (RA/Dec) → query GAIA DR3 → cross-match with AXY objects only
-  2. FALLBACK — if no rdls.fits, try WCS from -image.fits → query GAIA DR3 → cross-match with AXY
+  1. PRIMARY  — read rdls.fits (RA/Dec) → query GAIA DR3 → cross-match with Annotations only
+  2. FALLBACK — if no rdls.fits, try WCS from -image.fits → query GAIA DR3 → cross-match with Annotations
   3. SKIP     — if neither works, skip the entry
 
 GAIA queries are cached to disk so re-runs are instant.
@@ -21,6 +21,7 @@ import argparse
 import json
 import sys
 import warnings
+import csv
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
@@ -40,6 +41,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from model_training.data_preprocessing.loader import DatasetLoader
 from model_training.data_preprocessing.normalization.log_normalization import LogPercentileNormalization
 from model_training.data_preprocessing.masking.circular_dynamic_masking import CircularDynamicMasking
+from model_training.data_preprocessing.masking.annotation_masking import AnnotationMasking
 from model_analysis.detector import Detector
 from model_analysis.postprocessing.morphological_postprocessing import MorphologicalClosing
 
@@ -67,10 +69,11 @@ MIN_CALIBRATED_OBJECTS   = 30
 
 @dataclass
 class MagRecord:
-    gaia_mag:  float
-    detected:  bool
-    flux_adu:  float
-    source:    str
+    gaia_mag:    float
+    detected:    bool
+    distance_px: float
+    flux_adu:    float
+    source:      str
 
 
 @dataclass
@@ -214,7 +217,6 @@ def get_gaia_sources(
 ) -> tuple[Optional[list[dict]], Optional[WCS], str]:
     """
     Returns (gaia_sources, wcs, strategy) where strategy is 'rdls', 'wcs', or 'skip'.
-    gaia_sources is a list of dicts: {ra, dec, mag}
     """
     cached = load_cache(cache_dir, entry_id)
     if cached is not None:
@@ -269,46 +271,51 @@ def get_gaia_sources(
     return None, wcs, "skip"
 
 
-def crossmatch_axy_to_gaia(
-    axy_objects:  list,          
+def crossmatch_annotations_to_gaia(
+    annotations:  list[dict],          
     gaia_sources: list[dict],   
     wcs:          WCS,
     radius_arcsec: float = CROSSMATCH_RADIUS_ARCSEC,
 ) -> list[dict]:
     """
-    For each AXY object:
-      1. Project pixel → sky via WCS
+    For each JSON annotation object:
+      1. Project original pixel → sky via WCS
       2. Find nearest GAIA source within radius_arcsec
-      3. Assign that GAIA magnitude to the AXY object
-
-    Returns list of dicts: {x, y, flux_adu, gaia_mag}
-    Only AXY objects that have a GAIA match are returned.
+      3. Assign GAIA magnitude to the annotation
     """
-    if not axy_objects or not gaia_sources:
+    if not annotations or not gaia_sources:
         return []
 
-    axy_px = np.array([(o[0], o[1]) for o in axy_objects])
+    px_list = []
+    for ann in annotations:
+        x, y = float(ann.get("pixelx", -1)), float(ann.get("pixely", -1))
+        if x >= 0 and y >= 0:
+            px_list.append((x, y))
+
+    if not px_list:
+        return []
+
+    ann_px = np.array(px_list)
     try:
-        axy_sky = wcs.pixel_to_world(axy_px[:, 0], axy_px[:, 1])
+        ann_sky = wcs.pixel_to_world(ann_px[:, 0], ann_px[:, 1])
     except Exception:
         return []
 
-    axy_coords  = SkyCoord(ra=axy_sky.ra, dec=axy_sky.dec)
+    ann_coords  = SkyCoord(ra=ann_sky.ra, dec=ann_sky.dec)
     gaia_coords = SkyCoord(
         ra  = [s["ra"]  for s in gaia_sources] * u.deg,
         dec = [s["dec"] for s in gaia_sources] * u.deg,
     )
 
-    idx, sep2d, _ = axy_coords.match_to_catalog_sky(gaia_coords)
+    idx, sep2d, _ = ann_coords.match_to_catalog_sky(gaia_coords)
 
     matched = []
-    for i, (axy_obj, gi, sep) in enumerate(zip(axy_objects, idx, sep2d.arcsec)):
+    for i, (px, gi, sep) in enumerate(zip(px_list, idx, sep2d.arcsec)):
         if sep > radius_arcsec:
             continue
         matched.append({
-            "x":        float(axy_obj[0]),
-            "y":        float(axy_obj[1]),
-            "flux_adu": float(axy_obj[2]),
+            "x_orig":   px[0],
+            "y_orig":   px[1],
             "gaia_mag": gaia_sources[gi]["mag"],
         })
 
@@ -323,7 +330,7 @@ def collect_mag_records(
     tolerance_px: int   = 5,
     max_entries:  Optional[int] = None,
     crossmatch_r: float = CROSSMATCH_RADIUS_ARCSEC,
-) -> list[MagRecord]:
+) -> tuple[list[MagRecord], int, int]:
 
     records: list[MagRecord] = []
     entries_list = list(test_dataset.items())
@@ -335,55 +342,103 @@ def collect_mag_records(
     n_wcs    = 0
     n_skip   = 0
 
+    total_predicciones = 0
+    predicciones_acertadas = 0
+
     for i, (entry_id, entry) in enumerate(entries_list):
         print(f"  [{i+1:>3}/{n_total}] {entry_id}", end=" ", flush=True)
 
         entry_dir   = dataset_path / entry_id
-        image_shape = entry.nn_input_image.shape[:2]
-        gt_objects  = entry.filtered_objects   # [(x, y, flux), ...]
-
-        if not gt_objects:
-            print("[skip] no GT objects")
+        
+        fits_path = entry_dir / f"{entry_id}-image.fits"
+        if not fits_path.exists():
+            print("[skip] missing image.fits")
+            n_skip += 1
+            continue
+            
+        try:
+            with fits.open(fits_path) as hdul:
+                h_orig, w_orig = hdul[0].data.shape[-2:]
+        except Exception:
+            print("[skip] failed to read image.fits shape")
             n_skip += 1
             continue
 
-        gaia_sources, wcs, strategy = get_gaia_sources(
-            entry_dir, entry_id, image_shape, cache_dir
+        h_target, w_target = entry.nn_input_image.shape[:2]
+
+        ann_path = entry_dir / f"{entry_id}-annotations.json"
+        if not ann_path.exists():
+            print("[skip] missing annotations.json")
+            n_skip += 1
+            continue
+            
+        try:
+            with open(ann_path) as f:
+                annotations = json.load(f)
+        except Exception:
+            print("[skip] corrupt annotations.json")
+            n_skip += 1
+            continue
+
+        if not annotations:
+            print("[skip] empty annotations")
+            n_skip += 1
+            continue
+
+        gaia_sources, wcs_from_gaia, strategy = get_gaia_sources(
+            entry_dir, entry_id, (h_orig, w_orig), cache_dir
         )
 
-        if gaia_sources is None or wcs is None:
-            print(f"[skip] {strategy}")
+        wcs = wcs_from_gaia or load_wcs(entry_dir, entry_id)
+
+        if not gaia_sources or not wcs:
+            print(f"[skip] {strategy} (missing WCS or GAIA)")
             n_skip += 1
             continue
 
-        matched = crossmatch_axy_to_gaia(gt_objects, gaia_sources, wcs, crossmatch_r)
+        matched = crossmatch_annotations_to_gaia(annotations, gaia_sources, wcs, crossmatch_r)
         if not matched:
-            print(f"[skip] 0/{len(gt_objects)} AXY objects matched to GAIA")
+            print(f"[skip] 0/{len(annotations)} annotations matched to GAIA")
             n_skip += 1
             continue
 
+        # Inferencia del modelo en imagen de 256x256
         mask     = detector.predict_mask(entry.nn_input_image)
         pred_pos = detector.postprocessing.extract_positions(mask)
         pred_arr = np.array(pred_pos) if pred_pos else np.empty((0, 2))
 
+        total_predicciones += pred_arr.shape[0]
+        matched_pred_indices = set()
+
         for obj in matched:
-            gx, gy = obj["x"], obj["y"]
+            x_scaled = (obj["x_orig"] * w_target) / w_orig
+            y_scaled = (obj["y_orig"] * h_target) / h_orig
+            
             if pred_arr.shape[0] == 0:
                 detected = False
+                min_dist = np.nan
             else:
-                dists    = np.sqrt((pred_arr[:, 0]-gx)**2 + (pred_arr[:, 1]-gy)**2)
-                detected = bool(dists.min() <= tolerance_px)
+                dists    = np.sqrt((pred_arr[:, 0] - x_scaled)**2 + (pred_arr[:, 1] - y_scaled)**2)
+                min_dist = dists.min()
+                best_idx = dists.argmin()
+                
+                detected = bool(min_dist <= tolerance_px)
+                
+                if detected and best_idx not in matched_pred_indices:
+                    matched_pred_indices.add(best_idx)
+                    predicciones_acertadas += 1
+
             records.append(MagRecord(
-                gaia_mag = obj["gaia_mag"],
-                detected = detected,
-                flux_adu = obj["flux_adu"],
-                source   = strategy.replace("(cached)", ""),
+                gaia_mag    = obj["gaia_mag"],
+                detected    = detected,
+                distance_px = min_dist if detected else np.nan,
+                flux_adu    = 0.0,
+                source      = strategy.replace("(cached)", ""),
             ))
 
-        is_cached = "(cached)" in strategy
-        tag       = strategy
-        n_det     = sum(r.detected for r in records[-len(matched):])
-        print(f"[{tag}] {len(matched)}/{len(gt_objects)} matched, {n_det}/{len(matched)} detected")
+        tag   = strategy.replace("(cached)", "")
+        n_det = sum(r.detected for r in records[-len(matched):])
+        print(f"[{tag}] {len(matched)}/{len(annotations)} matched, {n_det}/{len(matched)} detected")
 
         if "rdls" in strategy:
             n_rdls += 1
@@ -393,8 +448,8 @@ def collect_mag_records(
     print(f"\n  rdls strategy : {n_rdls}/{n_total}")
     print(f"  wcs  strategy : {n_wcs}/{n_total}")
     print(f"  skipped       : {n_skip}/{n_total}")
-    print(f"  Total calibrated objects : {len(records)}")
-    return records
+    
+    return records, total_predicciones, predicciones_acertadas
 
 
 def compute_completeness(
@@ -445,7 +500,7 @@ def plot_results(
     output_dir: Path,
 ) -> None:
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    fig.suptitle("Model Detection Limit — GAIA-Calibrated (AXY-only cross-match)", fontsize=13)
+    fig.suptitle("Satellite Visibility Analysis\n(GAIA DR3 + Annotations)", fontsize=14, fontweight='bold', y=1.05)
 
     ax = axes[0]
     valid = ~np.isnan(curve.completeness)
@@ -471,7 +526,7 @@ def plot_results(
     ax.set_xlabel("GAIA magnitude (RP ≈ Cousins R)")
     ax.set_ylabel("Detection completeness")
     ax.set_ylim(-0.05, 1.1)
-    ax.set_title("Completeness vs. real magnitude\n(only AXY-catalogue objects)")
+    ax.set_title("Completeness vs. Real Magnitude\n(Verified Annotated Objects)")
     ax.legend(fontsize=8, loc="lower left")
     ax.grid(True, alpha=0.3)
 
@@ -480,28 +535,31 @@ def plot_results(
             width=np.diff(curve.bin_centers).mean() * 0.8,
             color="#378ADD", alpha=0.7)
     ax2.set_xlabel("GAIA magnitude")
-    ax2.set_ylabel("AXY object count")
-    ax2.set_title("AXY objects per magnitude bin")
+    ax2.set_ylabel("Annotated Object Count")
+    ax2.set_title("Distribution of Annotated Objects")
     ax2.grid(True, alpha=0.3, axis="y")
 
     ax3 = axes[2]
     mags_det  = [r.gaia_mag for r in records if r.detected]
     mags_miss = [r.gaia_mag for r in records if not r.detected]
     all_mags  = [r.gaia_mag for r in records]
-    bins      = np.linspace(min(all_mags), max(all_mags), 30)
-    ax3.hist(mags_det,  bins=bins, color="#378ADD", alpha=0.75, label="Detected")
-    ax3.hist(mags_miss, bins=bins, color="#E24B4A", alpha=0.75, label="Missed")
+    
+    if len(all_mags) > 0:
+        bins = np.linspace(min(all_mags), max(all_mags), 30)
+        ax3.hist(mags_det,  bins=bins, color="#378ADD", alpha=0.75, label="Detected")
+        ax3.hist(mags_miss, bins=bins, color="#E24B4A", alpha=0.75, label="Missed")
+    
     if sat.apparent_magnitude is not None:
         ax3.axvline(sat.apparent_magnitude, color="#1D9E75", lw=2, label=f"{sat.label}")
     ax3.set_xlabel("GAIA magnitude")
     ax3.set_ylabel("Count")
-    ax3.set_title("Detected vs. missed by magnitude\n(AXY objects only)")
+    ax3.set_title("Detected vs. Missed\n(by Magnitude)")
     ax3.legend(fontsize=8)
     ax3.grid(True, alpha=0.3)
 
     plt.tight_layout()
     out = output_dir / "satellite_visibility.png"
-    plt.savefig(str(out), dpi=200)
+    plt.savefig(str(out), dpi=200, bbox_inches='tight')
     plt.show()
     print(f"Plot saved: {out}")
 
@@ -509,7 +567,7 @@ def plot_results(
 def print_verdict(curve: CompletenessCurve, sat: SatelliteParams) -> None:
     sep = "─" * 64
     print(f"\n{sep}")
-    print("  SATELLITE VISIBILITY ANALYSIS  —  GAIA-calibrated (AXY-only)")
+    print("  DETECTION LIMIT VERDICT  —  GAIA-calibrated (Annotations)")
     print(sep)
 
     if np.isfinite(curve.mag_50pct):
@@ -589,7 +647,7 @@ def main() -> None:
 
     target_shape   = (args.shape, args.shape)
     normalization  = LogPercentileNormalization()
-    masking        = CircularDynamicMasking()
+    masking        = AnnotationMasking(radius=4, border_margin=5)
     postprocessing = MorphologicalClosing()
 
     loader  = DatasetLoader(normalization=normalization, masking=masking, target_shape=target_shape)
@@ -597,7 +655,7 @@ def main() -> None:
     dataset = loader.load(args.dataset)
 
     items = list(dataset.items())
-    _, rest       = train_test_split(items, train_size=0.5, shuffle=True, random_state=42)
+    _, rest       = train_test_split(items, train_size=0.7, shuffle=True, random_state=42)
     test_items, _ = train_test_split(rest,  train_size=0.5, shuffle=True, random_state=42)
     test_dataset  = dict(test_items)
     print(f"Test set: {len(test_dataset)} entries")
@@ -610,7 +668,8 @@ def main() -> None:
     )
 
     print(f"\nProcessing entries (GAIA cache: {cache_dir})...")
-    records = collect_mag_records(
+    
+    records, total_preds, correct_preds = collect_mag_records(
         test_dataset = test_dataset,
         dataset_path = args.dataset,
         detector     = detector,
@@ -625,15 +684,49 @@ def main() -> None:
               f"(recommended ≥ {MIN_CALIBRATED_OBJECTS}).")
 
     if len(records) == 0:
-        print("\nNo calibrated objects. Check rdls.fits files and internet connection.")
+        print("\nNo calibrated objects. Check internet connection and dataset files.")
         sys.exit(1)
 
-    print(f"\nTotal calibrated objects : {len(records)}")
+    # ---------------------------------------------------------
+    # CÁLCULO DE NUEVAS MÉTRICAS (Pureza y Error de Puntería)
+    # ---------------------------------------------------------
+    falsos_positivos = total_preds - correct_preds
+    pureza = (correct_preds / total_preds * 100) if total_preds > 0 else 0.0
+    distancias_validas = [r.distance_px for r in records if not np.isnan(r.distance_px)]
+    error_medio = np.mean(distancias_validas) if distancias_validas else 0.0
+
+    print(f"\n────────────────────────────────────────────────────────────────")
+    print(f"  SATELLITE VISIBILITY ANALYSIS — GAIA-calibrated (Annotations)")
+    print(f"────────────────────────────────────────────────────────────────")
+    print(f"Total calibrated objects : {len(records)}")
     print(f"  via rdls : {sum(1 for r in records if r.source == 'rdls')}")
     print(f"  via wcs  : {sum(1 for r in records if r.source == 'wcs')}")
     print(f"  Detected : {sum(r.detected for r in records)}")
     print(f"  Missed   : {sum(not r.detected for r in records)}")
+    
+    print(f"\nModel Performance Metrics:")
+    print(f"  Total Predictions Made : {total_preds}")
+    print(f"  True Positives (Stars) : {correct_preds}")
+    print(f"  False Positives (Noise): {falsos_positivos}")
+    print(f"  Model Purity           : {pureza:.1f}%")
+    print(f"  Avg. Position Error    : {error_medio:.2f} pixels")
+    print(f"────────────────────────────────────────────────────────────────")
 
+    # ---------------------------------------------------------
+    # EXPORTACIÓN DE RESULTADOS RAW A CSV
+    # ---------------------------------------------------------
+    csv_path = args.output / "visibility_records.csv"
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["gaia_mag", "detected", "distance_px", "source"])
+        for r in records:
+            dist_str = f"{r.distance_px:.2f}" if not np.isnan(r.distance_px) else ""
+            writer.writerow([r.gaia_mag, r.detected, dist_str, r.source])
+    print(f"Raw tracking data saved to: {csv_path}")
+
+    # ---------------------------------------------------------
+    # GRÁFICAS Y VEREDICTO
+    # ---------------------------------------------------------
     curve = compute_completeness(records, n_bins=args.bins)
 
     sat = SatelliteParams(label=args.sat_label, num_leds=args.num_leds)

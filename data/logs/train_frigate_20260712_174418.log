@@ -1,0 +1,255 @@
+Loading Frigate dataset...
+Loaded 1180 Frigate pairs
+
+==================================================
+EXPERIMENT CONFIGURATION
+==================================================
+NORMALIZATION  : IdentityNormalization
+LOSS           : CombinedLoss
+                 {'loss_a': 'DiceLoss', 'loss_b': 'FocalLossModule', 'weight_a': 0.5, 'weight_b': 0.5}
+MODEL          : UNet3Levels
+                 {'prior_prob': 0.008}
+AUGMENTATION   : FlipRotateAugmentation
+                 {'use_flips': True, 'use_rotations': True}
+MASKING        : None
+==================================================
+
+Train: 826 con estrellas + 0/0 vacías mantenidas
+Train: 826 | Test: 177 | Val: 177
+Densidad positivos: 0.3086%
+IoU perfecto (0 FP): 1.0000 → 1.0
+IoU con 1% FP adicional: 0.2358
+IoU con 0.5% FP adicional: 0.3817
+train_images: torch.Size([826, 256, 256, 1])
+train_masks: torch.Size([826, 256, 256])
+Valores únicos train_masks: tensor([0, 1])
+Pixels estrella train: 165908
+Valores únicos val_masks: tensor([0, 1])
+Pixels estrella val: 35802
+Imágenes con estrellas: 826/826
+Train star pixels: 165908 / 54132736 = 0.3065%
+Val   star pixels: 35802   / 11599872   = 0.3086%
+Tamaño train: 826
+Tamaño val: 177
+Train mask unique: [0, 1]
+UNet3LevelsModule(
+  (enc1): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (enc2): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (enc3): EncoderBlock(
+    (conv): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+    (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (bridge): ConvBlock(
+    (block): Sequential(
+      (0): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): GroupNorm(8, 512, eps=1e-05, affine=True)
+      (2): ReLU(inplace=True)
+      (3): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (4): GroupNorm(8, 512, eps=1e-05, affine=True)
+      (5): ReLU(inplace=True)
+    )
+  )
+  (dec3): DecoderBlock(
+    (upsample): ConvTranspose2d(512, 256, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(512, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 256, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (dec2): DecoderBlock(
+    (upsample): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 128, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (dec1): DecoderBlock(
+    (upsample): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2))
+    (conv_block): ConvBlock(
+      (block): Sequential(
+        (0): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (4): GroupNorm(8, 64, eps=1e-05, affine=True)
+        (5): ReLU(inplace=True)
+      )
+    )
+  )
+  (output_conv): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+  (final_activation): Sigmoid()
+)
+Epoch   1/100 [56.49s]
+  TRAIN  loss: 0.4953  iou: 0.0139  f1: 0.0230  prec: 0.9421  rec: 0.0451  spec: 0.9993
+  VAL    loss: 0.4992  iou: 0.0000  f1: 0.0000  prec: 1.0000  rec: 0.0000  spec: 1.0000
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch   2/100 [34.58s]
+  TRAIN  loss: 0.4986  iou: 0.0000  f1: 0.0000  prec: 1.0000  rec: 0.0000  spec: 1.0000
+  VAL    loss: 0.4984  iou: 0.0000  f1: 0.0000  prec: 1.0000  rec: 0.0000  spec: 1.0000
+  LR: 1.00e-03
+Epoch   3/100 [34.39s]
+  TRAIN  loss: 0.4986  iou: 0.0000  f1: 0.0000  prec: 1.0000  rec: 0.0000  spec: 1.0000
+  VAL    loss: 0.4976  iou: 0.0000  f1: 0.0000  prec: 1.0000  rec: 0.0000  spec: 1.0000
+  LR: 1.00e-03
+Epoch   4/100 [34.32s]
+  TRAIN  loss: 0.4942  iou: 0.0239  f1: 0.0359  prec: 0.9449  rec: 0.0450  spec: 0.9997
+  VAL    loss: 0.4989  iou: 0.0000  f1: 0.0000  prec: 1.0000  rec: 0.0000  spec: 1.0000
+  LR: 1.00e-03
+Epoch   5/100 [34.40s]
+  TRAIN  loss: 0.2094  iou: 0.4801  f1: 0.6227  prec: 0.8542  rec: 0.5475  spec: 0.9995
+  VAL    loss: 0.1355  iou: 0.5616  f1: 0.7166  prec: 0.8647  rec: 0.6161  spec: 0.9997
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch   6/100 [34.65s]
+  TRAIN  loss: 0.1333  iou: 0.5696  f1: 0.7219  prec: 0.8917  rec: 0.6134  spec: 0.9998
+  VAL    loss: 0.1353  iou: 0.5629  f1: 0.7176  prec: 0.9236  rec: 0.5906  spec: 0.9999
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch   7/100 [34.35s]
+  TRAIN  loss: 0.1322  iou: 0.5713  f1: 0.7232  prec: 0.8943  rec: 0.6145  spec: 0.9998
+  VAL    loss: 0.1334  iou: 0.5650  f1: 0.7193  prec: 0.8876  rec: 0.6086  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch   8/100 [34.49s]
+  TRAIN  loss: 0.1342  iou: 0.5656  f1: 0.7189  prec: 0.8969  rec: 0.6075  spec: 0.9998
+  VAL    loss: 0.1343  iou: 0.5635  f1: 0.7180  prec: 0.8946  rec: 0.6037  spec: 0.9998
+  LR: 1.00e-03
+Epoch   9/100 [34.24s]
+  TRAIN  loss: 0.1324  iou: 0.5674  f1: 0.7209  prec: 0.8960  rec: 0.6084  spec: 0.9998
+  VAL    loss: 0.1337  iou: 0.5652  f1: 0.7194  prec: 0.9262  rec: 0.5922  spec: 0.9999
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch  10/100 [34.31s]
+  TRAIN  loss: 0.1313  iou: 0.5715  f1: 0.7237  prec: 0.8954  rec: 0.6135  spec: 0.9998
+  VAL    loss: 0.1328  iou: 0.5664  f1: 0.7204  prec: 0.8990  rec: 0.6049  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch  11/100 [34.40s]
+  TRAIN  loss: 0.1322  iou: 0.5695  f1: 0.7221  prec: 0.8977  rec: 0.6111  spec: 0.9998
+  VAL    loss: 0.1328  iou: 0.5654  f1: 0.7197  prec: 0.8928  rec: 0.6070  spec: 0.9998
+  LR: 1.00e-03
+Epoch  12/100 [34.18s]
+  TRAIN  loss: 0.1312  iou: 0.5701  f1: 0.7230  prec: 0.8943  rec: 0.6126  spec: 0.9998
+  VAL    loss: 0.1318  iou: 0.5671  f1: 0.7210  prec: 0.8885  rec: 0.6108  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch  13/100 [34.27s]
+  TRAIN  loss: 0.1313  iou: 0.5724  f1: 0.7238  prec: 0.8948  rec: 0.6154  spec: 0.9998
+  VAL    loss: 0.1319  iou: 0.5668  f1: 0.7208  prec: 0.8843  rec: 0.6124  spec: 0.9998
+  LR: 1.00e-03
+Epoch  14/100 [34.70s]
+  TRAIN  loss: 0.1313  iou: 0.5742  f1: 0.7247  prec: 0.8956  rec: 0.6169  spec: 0.9998
+  VAL    loss: 0.1325  iou: 0.5663  f1: 0.7204  prec: 0.8838  rec: 0.6119  spec: 0.9998
+  LR: 1.00e-03
+Epoch  15/100 [34.40s]
+  TRAIN  loss: 0.1311  iou: 0.5708  f1: 0.7234  prec: 0.8950  rec: 0.6134  spec: 0.9998
+  VAL    loss: 0.1323  iou: 0.5665  f1: 0.7205  prec: 0.8864  rec: 0.6110  spec: 0.9998
+  LR: 1.00e-03
+Epoch  16/100 [34.13s]
+  TRAIN  loss: 0.1314  iou: 0.5697  f1: 0.7226  prec: 0.8940  rec: 0.6120  spec: 0.9998
+  VAL    loss: 0.1334  iou: 0.5631  f1: 0.7178  prec: 0.8794  rec: 0.6106  spec: 0.9997
+  LR: 1.00e-03
+Epoch  17/100 [34.00s]
+  TRAIN  loss: 0.1317  iou: 0.5706  f1: 0.7229  prec: 0.8954  rec: 0.6135  spec: 0.9998
+  VAL    loss: 0.1315  iou: 0.5690  f1: 0.7225  prec: 0.9038  rec: 0.6058  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch  18/100 [34.21s]
+  TRAIN  loss: 0.1306  iou: 0.5744  f1: 0.7252  prec: 0.8966  rec: 0.6168  spec: 0.9998
+  VAL    loss: 0.1333  iou: 0.5629  f1: 0.7175  prec: 0.9202  rec: 0.5919  spec: 0.9998
+  LR: 1.00e-03
+Epoch  19/100 [34.02s]
+  TRAIN  loss: 0.1309  iou: 0.5723  f1: 0.7243  prec: 0.8958  rec: 0.6146  spec: 0.9998
+  VAL    loss: 0.1331  iou: 0.5657  f1: 0.7198  prec: 0.8850  rec: 0.6107  spec: 0.9998
+  LR: 1.00e-03
+Epoch  20/100 [34.24s]
+  TRAIN  loss: 0.1308  iou: 0.5719  f1: 0.7239  prec: 0.8970  rec: 0.6138  spec: 0.9998
+  VAL    loss: 0.1317  iou: 0.5703  f1: 0.7235  prec: 0.9013  rec: 0.6083  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.00e-03
+Epoch  21/100 [34.02s]
+  TRAIN  loss: 0.1309  iou: 0.5718  f1: 0.7240  prec: 0.8960  rec: 0.6134  spec: 0.9998
+  VAL    loss: 0.1315  iou: 0.5676  f1: 0.7214  prec: 0.8891  rec: 0.6110  spec: 0.9998
+  LR: 1.00e-03
+Epoch  22/100 [33.88s]
+  TRAIN  loss: 0.1308  iou: 0.5731  f1: 0.7246  prec: 0.8976  rec: 0.6145  spec: 0.9998
+  VAL    loss: 0.1356  iou: 0.5600  f1: 0.7150  prec: 0.9379  rec: 0.5817  spec: 0.9999
+  LR: 1.00e-03
+Epoch  23/100 [33.92s]
+  TRAIN  loss: 0.1310  iou: 0.5708  f1: 0.7233  prec: 0.8960  rec: 0.6122  spec: 0.9998
+  VAL    loss: 0.1338  iou: 0.5620  f1: 0.7169  prec: 0.8688  rec: 0.6143  spec: 0.9997
+  LR: 1.00e-03
+Epoch  24/100 [33.60s]
+  TRAIN  loss: 0.1303  iou: 0.5752  f1: 0.7259  prec: 0.8968  rec: 0.6175  spec: 0.9998
+  VAL    loss: 0.1325  iou: 0.5659  f1: 0.7200  prec: 0.8795  rec: 0.6137  spec: 0.9997
+  LR: 1.00e-03
+Epoch  25/100 [33.77s]
+  TRAIN  loss: 0.1307  iou: 0.5742  f1: 0.7252  prec: 0.8936  rec: 0.6181  spec: 0.9998
+  VAL    loss: 0.1321  iou: 0.5662  f1: 0.7203  prec: 0.8970  rec: 0.6058  spec: 0.9998
+  LR: 1.00e-03
+Epoch  26/100 [33.94s]
+  TRAIN  loss: 0.1321  iou: 0.5689  f1: 0.7216  prec: 0.8988  rec: 0.6095  spec: 0.9998
+  VAL    loss: 0.1346  iou: 0.5615  f1: 0.7164  prec: 0.9533  rec: 0.5774  spec: 0.9999
+  LR: 1.00e-03
+Epoch  27/100 [33.29s]
+  TRAIN  loss: 0.1331  iou: 0.5680  f1: 0.7202  prec: 0.8963  rec: 0.6097  spec: 0.9998
+  VAL    loss: 0.1336  iou: 0.5647  f1: 0.7190  prec: 0.9255  rec: 0.5917  spec: 0.9999
+  LR: 1.00e-03
+Epoch  28/100 [33.24s]
+  TRAIN  loss: 0.1304  iou: 0.5729  f1: 0.7248  prec: 0.8966  rec: 0.6146  spec: 0.9998
+  VAL    loss: 0.1315  iou: 0.5680  f1: 0.7217  prec: 0.9000  rec: 0.6065  spec: 0.9998
+  LR: 1.00e-03
+Epoch  29/100 [33.57s]
+  TRAIN  loss: 0.1305  iou: 0.5756  f1: 0.7261  prec: 0.8964  rec: 0.6185  spec: 0.9998
+  VAL    loss: 0.1315  iou: 0.5698  f1: 0.7231  prec: 0.9098  rec: 0.6040  spec: 0.9998
+  LR: 1.00e-03
+Epoch  30/100 [33.78s]
+  TRAIN  loss: 0.1301  iou: 0.5739  f1: 0.7255  prec: 0.8954  rec: 0.6162  spec: 0.9998
+  VAL    loss: 0.1320  iou: 0.5677  f1: 0.7215  prec: 0.9048  rec: 0.6041  spec: 0.9998
+  LR: 1.00e-03

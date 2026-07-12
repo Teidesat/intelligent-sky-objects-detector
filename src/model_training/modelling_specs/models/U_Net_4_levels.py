@@ -1,10 +1,10 @@
-import torch
+import math
 import torch.nn as nn
 from .u_net_base_interface import UNetBase, ConvBlock, EncoderBlock, DecoderBlock
 
 
 class UNet4LevelsModule(nn.Module):
-    def __init__(self, in_channels: int, num_classes: int):
+    def __init__(self, in_channels: int, num_classes: int, apply_activation: bool = True, prior_prob: float = 0.04):
         super().__init__()
         self.enc1 = EncoderBlock(in_channels, 64)
         self.enc2 = EncoderBlock(64, 128)
@@ -18,8 +18,15 @@ class UNet4LevelsModule(nn.Module):
         self.dec2 = DecoderBlock(256, 128, 128)
         self.dec1 = DecoderBlock(128, 64, 64)
 
-        self.output_conv = nn.Conv2d(64, 1, kernel_size=1)
-        self.sigmoid = nn.Sigmoid()
+        self.output_conv = nn.Conv2d(64, num_classes, kernel_size=1)
+        self.final_activation = nn.Sigmoid() if apply_activation else nn.Identity()
+        self._init_output_bias(prior_prob)
+
+    def _init_output_bias(self, prior_prob: float):
+        if self.output_conv.out_channels != 1:
+            return  # pensado para cabeza Sigmoid de 1 canal
+        bias_value = -math.log((1 - prior_prob) / prior_prob)
+        nn.init.constant_(self.output_conv.bias, bias_value)
 
     def forward(self, x):
         conv1, pool1 = self.enc1(x)
@@ -34,15 +41,16 @@ class UNet4LevelsModule(nn.Module):
         x = self.dec2(x, conv2)
         x = self.dec1(x, conv1)
 
-        return self.sigmoid(self.output_conv(x))
+        return self.final_activation(self.output_conv(x))
 
 
 class UNet4Levels(UNetBase):
-    """
-    Original U-Net with 4 encoder/decoder levels.
-    Higher capacity than UNet3Levels but with a stronger bottleneck.
-    """
+    """U-Net with 4 levels. More capacity than UNet3Levels but a stronger bottleneck."""
 
-    def build(self, input_shape: tuple, num_classes: int) -> nn.Module:
+    def __init__(self, prior_prob: float = 0.04):
+        self.prior_prob = prior_prob
+
+    def build(self, input_shape: tuple, num_classes: int, apply_activation: bool = True) -> nn.Module:
         in_channels = input_shape[2]
-        return UNet4LevelsModule(in_channels=in_channels, num_classes=num_classes)
+        return UNet4LevelsModule(in_channels=in_channels, num_classes=num_classes,
+                                  apply_activation=apply_activation, prior_prob=self.prior_prob)

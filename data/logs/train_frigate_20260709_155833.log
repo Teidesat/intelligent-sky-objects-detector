@@ -1,0 +1,33 @@
+Loading Frigate dataset...
+Loaded 219 Frigate pairs
+
+==================================================
+EXPERIMENT CONFIGURATION
+==================================================
+NORMALIZATION  : LogPercentileNormalization
+                 {'lowest_percentile': 1.0, 'highest_percentile': 99.9}
+LOSS           : CombinedLoss
+                 {'loss_a': 'DiceLoss', 'loss_b': 'FocalLossModule', 'weight_a': 0.5, 'weight_b': 0.5}
+MODEL          : UNet3Levels
+                 {'prior_prob': 0.008}
+AUGMENTATION   : FlipRotateAugmentation
+                 {'use_flips': True, 'use_rotations': True}
+MASKING        : AnnotationMasking
+                 {'radius': 6, 'border_margin': 5}
+==================================================
+
+Train: 0 con estrellas + 45/153 vacías mantenidas
+Train: 45 | Test: 33 | Val: 33
+Densidad positivos: 0.0000%
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/app/src/model_training/train.py", line 257, in <module>
+    main()
+  File "/app/src/model_training/train.py", line 192, in main
+    theoretical_max_iou(val_masks)
+  File "/app/src/model_training/train.py", line 184, in theoretical_max_iou
+    print(f"IoU perfecto (0 FP): {ratio / (ratio + (1-ratio)*0.0):.4f} → 1.0")
+ZeroDivisionError: float division by zero

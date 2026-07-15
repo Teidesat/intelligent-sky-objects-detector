@@ -39,7 +39,6 @@ services:
               count: all
               capabilities: [gpu]
 
-  # Nuevo: preprocesar Frigate (generar pares imagen+máscara)
   preprocess_frigate:
     build: .
     image: sky-detector
@@ -67,7 +66,6 @@ services:
               count: all
               capabilities: [gpu]
 
-  # Nuevo: entrenar con Frigate
   train_frigate:
     build: .
     image: sky-detector
@@ -99,7 +97,6 @@ services:
               count: all
               capabilities: [gpu]
 
-  # Opcional: evaluar modelo entrenado con Frigate
   eval_frigate:
     build: .
     image: sky-detector
@@ -122,7 +119,6 @@ services:
               count: all
               capabilities: [gpu]
 
-  # Opcional: inferencia en una imagen de Frigate
   infer_frigate:
     build: .
     image: sky-detector
@@ -145,7 +141,6 @@ services:
               count: all
               capabilities: [gpu]
 
-  # (Servicios existentes: infer, eval, visibility, test_infer se mantienen igual)
   infer:
     build: .
     image: sky-detector

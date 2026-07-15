@@ -253,3 +253,298 @@ Epoch  30/100 [33.78s]
   TRAIN  loss: 0.1301  iou: 0.5739  f1: 0.7255  prec: 0.8954  rec: 0.6162  spec: 0.9998
   VAL    loss: 0.1320  iou: 0.5677  f1: 0.7215  prec: 0.9048  rec: 0.6041  spec: 0.9998
   LR: 1.00e-03
+Epoch  31/100 [33.52s]
+  TRAIN  loss: 0.1307  iou: 0.5724  f1: 0.7243  prec: 0.8956  rec: 0.6143  spec: 0.9998
+  VAL    loss: 0.1324  iou: 0.5660  f1: 0.7200  prec: 0.8982  rec: 0.6048  spec: 0.9998
+  LR: 5.00e-04
+Epoch  32/100 [33.57s]
+  TRAIN  loss: 0.1297  iou: 0.5747  f1: 0.7262  prec: 0.8956  rec: 0.6170  spec: 0.9998
+  VAL    loss: 0.1318  iou: 0.5667  f1: 0.7207  prec: 0.8887  rec: 0.6102  spec: 0.9998
+  LR: 5.00e-04
+Epoch  33/100 [33.71s]
+  TRAIN  loss: 0.1300  iou: 0.5733  f1: 0.7252  prec: 0.8967  rec: 0.6147  spec: 0.9998
+  VAL    loss: 0.1309  iou: 0.5710  f1: 0.7241  prec: 0.9072  rec: 0.6065  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 5.00e-04
+Epoch  34/100 [33.16s]
+  TRAIN  loss: 0.1297  iou: 0.5766  f1: 0.7271  prec: 0.8968  rec: 0.6189  spec: 0.9998
+  VAL    loss: 0.1321  iou: 0.5675  f1: 0.7213  prec: 0.8963  rec: 0.6075  spec: 0.9998
+  LR: 5.00e-04
+Epoch  35/100 [33.94s]
+  TRAIN  loss: 0.1297  iou: 0.5747  f1: 0.7262  prec: 0.8958  rec: 0.6172  spec: 0.9998
+  VAL    loss: 0.1330  iou: 0.5668  f1: 0.7206  prec: 0.9192  rec: 0.5964  spec: 0.9998
+  LR: 5.00e-04
+Epoch  36/100 [33.60s]
+  TRAIN  loss: 0.1296  iou: 0.5767  f1: 0.7273  prec: 0.8976  rec: 0.6190  spec: 0.9998
+  VAL    loss: 0.1316  iou: 0.5675  f1: 0.7213  prec: 0.8906  rec: 0.6102  spec: 0.9998
+  LR: 5.00e-04
+Epoch  37/100 [33.64s]
+  TRAIN  loss: 0.1298  iou: 0.5739  f1: 0.7258  prec: 0.8954  rec: 0.6165  spec: 0.9998
+  VAL    loss: 0.1329  iou: 0.5642  f1: 0.7186  prec: 0.8740  rec: 0.6140  spec: 0.9997
+  LR: 5.00e-04
+Epoch  38/100 [33.73s]
+  TRAIN  loss: 0.1295  iou: 0.5736  f1: 0.7259  prec: 0.8981  rec: 0.6149  spec: 0.9998
+  VAL    loss: 0.1332  iou: 0.5691  f1: 0.7224  prec: 0.9313  rec: 0.5939  spec: 0.9999
+  LR: 5.00e-04
+Epoch  39/100 [33.33s]
+  TRAIN  loss: 0.1302  iou: 0.5721  f1: 0.7246  prec: 0.8972  rec: 0.6129  spec: 0.9998
+  VAL    loss: 0.1315  iou: 0.5670  f1: 0.7209  prec: 0.8877  rec: 0.6111  spec: 0.9998
+  LR: 5.00e-04
+Epoch  40/100 [33.53s]
+  TRAIN  loss: 0.1296  iou: 0.5757  f1: 0.7267  prec: 0.8963  rec: 0.6178  spec: 0.9998
+  VAL    loss: 0.1311  iou: 0.5688  f1: 0.7223  prec: 0.8999  rec: 0.6073  spec: 0.9998
+  LR: 5.00e-04
+Epoch  41/100 [33.48s]
+  TRAIN  loss: 0.1295  iou: 0.5758  f1: 0.7270  prec: 0.8976  rec: 0.6176  spec: 0.9998
+  VAL    loss: 0.1321  iou: 0.5650  f1: 0.7194  prec: 0.8784  rec: 0.6133  spec: 0.9997
+  LR: 5.00e-04
+Epoch  42/100 [33.49s]
+  TRAIN  loss: 0.1295  iou: 0.5735  f1: 0.7257  prec: 0.8972  rec: 0.6149  spec: 0.9998
+  VAL    loss: 0.1313  iou: 0.5684  f1: 0.7220  prec: 0.9017  rec: 0.6060  spec: 0.9998
+  LR: 5.00e-04
+Epoch  43/100 [33.33s]
+  TRAIN  loss: 0.1299  iou: 0.5744  f1: 0.7258  prec: 0.8986  rec: 0.6158  spec: 0.9998
+  VAL    loss: 0.1319  iou: 0.5710  f1: 0.7241  prec: 0.9274  rec: 0.5977  spec: 0.9999
+  LR: 5.00e-04
+Epoch  44/100 [33.38s]
+  TRAIN  loss: 0.1295  iou: 0.5759  f1: 0.7267  prec: 0.8987  rec: 0.6173  spec: 0.9998
+  VAL    loss: 0.1309  iou: 0.5681  f1: 0.7218  prec: 0.8999  rec: 0.6067  spec: 0.9998
+  LR: 2.50e-04
+Epoch  45/100 [33.14s]
+  TRAIN  loss: 0.1290  iou: 0.5782  f1: 0.7283  prec: 0.9005  rec: 0.6191  spec: 0.9998
+  VAL    loss: 0.1313  iou: 0.5678  f1: 0.7216  prec: 0.8918  rec: 0.6099  spec: 0.9998
+  LR: 2.50e-04
+Epoch  46/100 [33.68s]
+  TRAIN  loss: 0.1291  iou: 0.5751  f1: 0.7267  prec: 0.8994  rec: 0.6158  spec: 0.9998
+  VAL    loss: 0.1317  iou: 0.5704  f1: 0.7236  prec: 0.9154  rec: 0.6022  spec: 0.9998
+  LR: 2.50e-04
+Epoch  47/100 [33.32s]
+  TRAIN  loss: 0.1291  iou: 0.5759  f1: 0.7270  prec: 0.8982  rec: 0.6174  spec: 0.9998
+  VAL    loss: 0.1306  iou: 0.5694  f1: 0.7228  prec: 0.9025  rec: 0.6069  spec: 0.9998
+  LR: 2.50e-04
+Epoch  48/100 [33.57s]
+  TRAIN  loss: 0.1287  iou: 0.5771  f1: 0.7278  prec: 0.8998  rec: 0.6174  spec: 0.9998
+  VAL    loss: 0.1306  iou: 0.5714  f1: 0.7244  prec: 0.9042  rec: 0.6082  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 2.50e-04
+Epoch  49/100 [33.24s]
+  TRAIN  loss: 0.1292  iou: 0.5736  f1: 0.7260  prec: 0.8998  rec: 0.6140  spec: 0.9998
+  VAL    loss: 0.1309  iou: 0.5693  f1: 0.7228  prec: 0.9040  rec: 0.6061  spec: 0.9998
+  LR: 2.50e-04
+Epoch  50/100 [33.59s]
+  TRAIN  loss: 0.1289  iou: 0.5751  f1: 0.7268  prec: 0.8995  rec: 0.6156  spec: 0.9998
+  VAL    loss: 0.1311  iou: 0.5696  f1: 0.7230  prec: 0.9100  rec: 0.6038  spec: 0.9998
+  LR: 2.50e-04
+Epoch  51/100 [33.45s]
+  TRAIN  loss: 0.1291  iou: 0.5757  f1: 0.7271  prec: 0.8994  rec: 0.6166  spec: 0.9998
+  VAL    loss: 0.1311  iou: 0.5684  f1: 0.7220  prec: 0.8936  rec: 0.6098  spec: 0.9998
+  LR: 2.50e-04
+Epoch  52/100 [33.72s]
+  TRAIN  loss: 0.1289  iou: 0.5769  f1: 0.7277  prec: 0.8998  rec: 0.6180  spec: 0.9998
+  VAL    loss: 0.1311  iou: 0.5683  f1: 0.7220  prec: 0.8929  rec: 0.6100  spec: 0.9998
+  LR: 2.50e-04
+Epoch  53/100 [33.60s]
+  TRAIN  loss: 0.1289  iou: 0.5757  f1: 0.7271  prec: 0.9010  rec: 0.6155  spec: 0.9998
+  VAL    loss: 0.1312  iou: 0.5694  f1: 0.7228  prec: 0.9112  rec: 0.6030  spec: 0.9998
+  LR: 2.50e-04
+Epoch  54/100 [33.49s]
+  TRAIN  loss: 0.1287  iou: 0.5770  f1: 0.7279  prec: 0.9022  rec: 0.6168  spec: 0.9998
+  VAL    loss: 0.1309  iou: 0.5694  f1: 0.7228  prec: 0.9035  rec: 0.6065  spec: 0.9998
+  LR: 2.50e-04
+Epoch  55/100 [33.74s]
+  TRAIN  loss: 0.1290  iou: 0.5755  f1: 0.7271  prec: 0.9011  rec: 0.6153  spec: 0.9998
+  VAL    loss: 0.1309  iou: 0.5712  f1: 0.7243  prec: 0.9127  rec: 0.6042  spec: 0.9998
+  LR: 2.50e-04
+Epoch  56/100 [33.51s]
+  TRAIN  loss: 0.1288  iou: 0.5762  f1: 0.7274  prec: 0.9011  rec: 0.6162  spec: 0.9998
+  VAL    loss: 0.1307  iou: 0.5703  f1: 0.7235  prec: 0.9029  rec: 0.6075  spec: 0.9998
+  LR: 2.50e-04
+Epoch  57/100 [33.17s]
+  TRAIN  loss: 0.1289  iou: 0.5761  f1: 0.7272  prec: 0.8994  rec: 0.6163  spec: 0.9998
+  VAL    loss: 0.1305  iou: 0.5710  f1: 0.7241  prec: 0.9088  rec: 0.6058  spec: 0.9998
+  LR: 2.50e-04
+Epoch  58/100 [33.62s]
+  TRAIN  loss: 0.1288  iou: 0.5777  f1: 0.7282  prec: 0.9019  rec: 0.6179  spec: 0.9998
+  VAL    loss: 0.1312  iou: 0.5693  f1: 0.7227  prec: 0.9004  rec: 0.6074  spec: 0.9998
+  LR: 2.50e-04
+Epoch  59/100 [33.51s]
+  TRAIN  loss: 0.1292  iou: 0.5763  f1: 0.7273  prec: 0.9017  rec: 0.6162  spec: 0.9998
+  VAL    loss: 0.1308  iou: 0.5679  f1: 0.7216  prec: 0.8934  rec: 0.6093  spec: 0.9998
+  LR: 1.25e-04
+Epoch  60/100 [33.56s]
+  TRAIN  loss: 0.1284  iou: 0.5772  f1: 0.7282  prec: 0.9010  rec: 0.6176  spec: 0.9998
+  VAL    loss: 0.1306  iou: 0.5718  f1: 0.7247  prec: 0.9165  rec: 0.6033  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.25e-04
+Epoch  61/100 [33.53s]
+  TRAIN  loss: 0.1287  iou: 0.5764  f1: 0.7275  prec: 0.9030  rec: 0.6154  spec: 0.9998
+  VAL    loss: 0.1303  iou: 0.5699  f1: 0.7232  prec: 0.9067  rec: 0.6056  spec: 0.9998
+  LR: 1.25e-04
+Epoch  62/100 [33.46s]
+  TRAIN  loss: 0.1288  iou: 0.5754  f1: 0.7271  prec: 0.9024  rec: 0.6145  spec: 0.9998
+  VAL    loss: 0.1301  iou: 0.5711  f1: 0.7242  prec: 0.9050  rec: 0.6077  spec: 0.9998
+  LR: 1.25e-04
+Epoch  63/100 [33.67s]
+  TRAIN  loss: 0.1288  iou: 0.5769  f1: 0.7278  prec: 0.9030  rec: 0.6163  spec: 0.9998
+  VAL    loss: 0.1307  iou: 0.5695  f1: 0.7229  prec: 0.9014  rec: 0.6074  spec: 0.9998
+  LR: 1.25e-04
+Epoch  64/100 [33.61s]
+  TRAIN  loss: 0.1287  iou: 0.5778  f1: 0.7281  prec: 0.9022  rec: 0.6171  spec: 0.9998
+  VAL    loss: 0.1306  iou: 0.5726  f1: 0.7253  prec: 0.9163  rec: 0.6042  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.25e-04
+Epoch  65/100 [33.45s]
+  TRAIN  loss: 0.1286  iou: 0.5784  f1: 0.7285  prec: 0.9031  rec: 0.6179  spec: 0.9998
+  VAL    loss: 0.1303  iou: 0.5692  f1: 0.7227  prec: 0.8967  rec: 0.6093  spec: 0.9998
+  LR: 1.25e-04
+Epoch  66/100 [33.52s]
+  TRAIN  loss: 0.1289  iou: 0.5776  f1: 0.7280  prec: 0.9030  rec: 0.6168  spec: 0.9998
+  VAL    loss: 0.1304  iou: 0.5712  f1: 0.7243  prec: 0.9082  rec: 0.6063  spec: 0.9998
+  LR: 1.25e-04
+Epoch  67/100 [33.43s]
+  TRAIN  loss: 0.1285  iou: 0.5765  f1: 0.7278  prec: 0.9040  rec: 0.6153  spec: 0.9998
+  VAL    loss: 0.1306  iou: 0.5721  f1: 0.7249  prec: 0.9184  rec: 0.6028  spec: 0.9998
+  LR: 1.25e-04
+Epoch  68/100 [33.60s]
+  TRAIN  loss: 0.1286  iou: 0.5779  f1: 0.7284  prec: 0.9038  rec: 0.6169  spec: 0.9998
+  VAL    loss: 0.1302  iou: 0.5732  f1: 0.7258  prec: 0.9184  rec: 0.6040  spec: 0.9998
+  ✓ Checkpoint saved (model-2026_07_12-17_44_50.ckpt.pt)
+  LR: 1.25e-04
+Epoch  69/100 [33.77s]
+  TRAIN  loss: 0.1288  iou: 0.5761  f1: 0.7275  prec: 0.9032  rec: 0.6153  spec: 0.9998
+  VAL    loss: 0.1302  iou: 0.5697  f1: 0.7231  prec: 0.9049  rec: 0.6062  spec: 0.9998
+  LR: 1.25e-04
+Epoch  70/100 [33.70s]
+  TRAIN  loss: 0.1284  iou: 0.5769  f1: 0.7281  prec: 0.9045  rec: 0.6153  spec: 0.9998
+  VAL    loss: 0.1304  iou: 0.5693  f1: 0.7228  prec: 0.9061  rec: 0.6052  spec: 0.9998
+  LR: 1.25e-04
+Epoch  71/100 [33.36s]
+  TRAIN  loss: 0.1284  iou: 0.5778  f1: 0.7284  prec: 0.9044  rec: 0.6162  spec: 0.9998
+  VAL    loss: 0.1305  iou: 0.5697  f1: 0.7231  prec: 0.8978  rec: 0.6093  spec: 0.9998
+  LR: 1.25e-04
+Epoch  72/100 [33.85s]
+  TRAIN  loss: 0.1291  iou: 0.5771  f1: 0.7278  prec: 0.9043  rec: 0.6157  spec: 0.9998
+  VAL    loss: 0.1306  iou: 0.5729  f1: 0.7256  prec: 0.9237  rec: 0.6015  spec: 0.9998
+  LR: 1.25e-04
+Epoch  73/100 [33.59s]
+  TRAIN  loss: 0.1284  iou: 0.5761  f1: 0.7278  prec: 0.9052  rec: 0.6140  spec: 0.9998
+  VAL    loss: 0.1302  iou: 0.5726  f1: 0.7253  prec: 0.9200  rec: 0.6028  spec: 0.9998
+  LR: 1.25e-04
+Epoch  74/100 [33.63s]
+  TRAIN  loss: 0.1284  iou: 0.5781  f1: 0.7286  prec: 0.9065  rec: 0.6156  spec: 0.9998
+  VAL    loss: 0.1307  iou: 0.5698  f1: 0.7232  prec: 0.8988  rec: 0.6090  spec: 0.9998
+  LR: 1.25e-04
+Epoch  75/100 [33.37s]
+  TRAIN  loss: 0.1288  iou: 0.5778  f1: 0.7282  prec: 0.9034  rec: 0.6172  spec: 0.9998
+  VAL    loss: 0.1308  iou: 0.5693  f1: 0.7228  prec: 0.8972  rec: 0.6091  spec: 0.9998
+  LR: 1.25e-04
+Epoch  76/100 [33.61s]
+  TRAIN  loss: 0.1285  iou: 0.5770  f1: 0.7280  prec: 0.9033  rec: 0.6158  spec: 0.9998
+  VAL    loss: 0.1304  iou: 0.5723  f1: 0.7251  prec: 0.9164  rec: 0.6039  spec: 0.9998
+  LR: 1.25e-04
+Epoch  77/100 [33.61s]
+  TRAIN  loss: 0.1285  iou: 0.5773  f1: 0.7281  prec: 0.9041  rec: 0.6160  spec: 0.9998
+  VAL    loss: 0.1302  iou: 0.5702  f1: 0.7235  prec: 0.8998  rec: 0.6090  spec: 0.9998
+  LR: 1.25e-04
+Epoch  78/100 [33.57s]
+  TRAIN  loss: 0.1287  iou: 0.5774  f1: 0.7280  prec: 0.9046  rec: 0.6159  spec: 0.9998
+  VAL    loss: 0.1304  iou: 0.5704  f1: 0.7236  prec: 0.9093  rec: 0.6049  spec: 0.9998
+  LR: 1.25e-04
+Epoch  79/100 [33.52s]
+  TRAIN  loss: 0.1284  iou: 0.5778  f1: 0.7284  prec: 0.9050  rec: 0.6162  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5714  f1: 0.7245  prec: 0.9086  rec: 0.6064  spec: 0.9998
+  LR: 6.25e-05
+Epoch  80/100 [33.56s]
+  TRAIN  loss: 0.1285  iou: 0.5788  f1: 0.7289  prec: 0.9065  rec: 0.6168  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5712  f1: 0.7242  prec: 0.9102  rec: 0.6054  spec: 0.9998
+  LR: 6.25e-05
+Epoch  81/100 [33.78s]
+  TRAIN  loss: 0.1283  iou: 0.5774  f1: 0.7284  prec: 0.9074  rec: 0.6147  spec: 0.9998
+  VAL    loss: 0.1303  iou: 0.5728  f1: 0.7255  prec: 0.9250  rec: 0.6007  spec: 0.9999
+  LR: 6.25e-05
+Epoch  82/100 [33.39s]
+  TRAIN  loss: 0.1282  iou: 0.5754  f1: 0.7275  prec: 0.9085  rec: 0.6116  spec: 0.9998
+  VAL    loss: 0.1303  iou: 0.5706  f1: 0.7237  prec: 0.9076  rec: 0.6059  spec: 0.9998
+  LR: 6.25e-05
+Epoch  83/100 [33.71s]
+  TRAIN  loss: 0.1282  iou: 0.5782  f1: 0.7288  prec: 0.9075  rec: 0.6155  spec: 0.9998
+  VAL    loss: 0.1308  iou: 0.5723  f1: 0.7251  prec: 0.9257  rec: 0.5999  spec: 0.9999
+  LR: 6.25e-05
+Epoch  84/100 [33.54s]
+  TRAIN  loss: 0.1282  iou: 0.5778  f1: 0.7287  prec: 0.9075  rec: 0.6154  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5728  f1: 0.7255  prec: 0.9166  rec: 0.6043  spec: 0.9998
+  LR: 6.25e-05
+Epoch  85/100 [33.59s]
+  TRAIN  loss: 0.1285  iou: 0.5768  f1: 0.7279  prec: 0.9071  rec: 0.6139  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5731  f1: 0.7257  prec: 0.9203  rec: 0.6030  spec: 0.9998
+  LR: 6.25e-05
+Epoch  86/100 [33.50s]
+  TRAIN  loss: 0.1284  iou: 0.5784  f1: 0.7288  prec: 0.9099  rec: 0.6146  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5709  f1: 0.7240  prec: 0.9063  rec: 0.6069  spec: 0.9998
+  LR: 6.25e-05
+Epoch  87/100 [33.65s]
+  TRAIN  loss: 0.1280  iou: 0.5787  f1: 0.7293  prec: 0.9079  rec: 0.6159  spec: 0.9998
+  VAL    loss: 0.1302  iou: 0.5724  f1: 0.7251  prec: 0.9160  rec: 0.6040  spec: 0.9998
+  LR: 6.25e-05
+Epoch  88/100 [33.58s]
+  TRAIN  loss: 0.1285  iou: 0.5755  f1: 0.7274  prec: 0.9099  rec: 0.6110  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5691  f1: 0.7226  prec: 0.9003  rec: 0.6077  spec: 0.9998
+  LR: 6.25e-05
+Epoch  89/100 [33.58s]
+  TRAIN  loss: 0.1281  iou: 0.5755  f1: 0.7274  prec: 0.9102  rec: 0.6106  spec: 0.9998
+  VAL    loss: 0.1301  iou: 0.5713  f1: 0.7243  prec: 0.9127  rec: 0.6044  spec: 0.9998
+  LR: 6.25e-05
+Epoch  90/100 [33.81s]
+  TRAIN  loss: 0.1281  iou: 0.5800  f1: 0.7297  prec: 0.9102  rec: 0.6163  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5707  f1: 0.7238  prec: 0.9110  rec: 0.6045  spec: 0.9998
+  LR: 3.13e-05
+Epoch  91/100 [33.65s]
+  TRAIN  loss: 0.1282  iou: 0.5787  f1: 0.7292  prec: 0.9133  rec: 0.6133  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5723  f1: 0.7252  prec: 0.9185  rec: 0.6030  spec: 0.9998
+  LR: 3.13e-05
+Epoch  92/100 [33.53s]
+  TRAIN  loss: 0.1282  iou: 0.5758  f1: 0.7277  prec: 0.9126  rec: 0.6098  spec: 0.9998
+  VAL    loss: 0.1301  iou: 0.5706  f1: 0.7237  prec: 0.9170  rec: 0.6017  spec: 0.9998
+  LR: 3.13e-05
+Epoch  93/100 [33.54s]
+  TRAIN  loss: 0.1282  iou: 0.5794  f1: 0.7295  prec: 0.9145  rec: 0.6135  spec: 0.9998
+  VAL    loss: 0.1301  iou: 0.5714  f1: 0.7244  prec: 0.9186  rec: 0.6020  spec: 0.9998
+  LR: 3.13e-05
+Epoch  94/100 [33.56s]
+  TRAIN  loss: 0.1282  iou: 0.5784  f1: 0.7289  prec: 0.9135  rec: 0.6127  spec: 0.9998
+  VAL    loss: 0.1302  iou: 0.5703  f1: 0.7235  prec: 0.9169  rec: 0.6014  spec: 0.9998
+  LR: 3.13e-05
+Epoch  95/100 [33.65s]
+  TRAIN  loss: 0.1280  iou: 0.5775  f1: 0.7287  prec: 0.9129  rec: 0.6120  spec: 0.9998
+  VAL    loss: 0.1302  iou: 0.5701  f1: 0.7233  prec: 0.9163  rec: 0.6015  spec: 0.9998
+  LR: 3.13e-05
+Epoch  96/100 [33.55s]
+  TRAIN  loss: 0.1282  iou: 0.5783  f1: 0.7288  prec: 0.9145  rec: 0.6125  spec: 0.9998
+  VAL    loss: 0.1301  iou: 0.5707  f1: 0.7238  prec: 0.9184  rec: 0.6012  spec: 0.9998
+  LR: 3.13e-05
+Epoch  97/100 [33.42s]
+  TRAIN  loss: 0.1278  iou: 0.5793  f1: 0.7298  prec: 0.9157  rec: 0.6133  spec: 0.9998
+  VAL    loss: 0.1303  iou: 0.5724  f1: 0.7252  prec: 0.9262  rec: 0.5998  spec: 0.9999
+  LR: 3.13e-05
+Epoch  98/100 [33.78s]
+  TRAIN  loss: 0.1281  iou: 0.5775  f1: 0.7286  prec: 0.9153  rec: 0.6110  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5704  f1: 0.7235  prec: 0.9100  rec: 0.6045  spec: 0.9998
+  LR: 3.13e-05
+Epoch  99/100 [33.58s]
+  TRAIN  loss: 0.1279  iou: 0.5772  f1: 0.7286  prec: 0.9169  rec: 0.6098  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5713  f1: 0.7243  prec: 0.9185  rec: 0.6018  spec: 0.9998
+  LR: 3.13e-05
+Epoch 100/100 [33.51s]
+  TRAIN  loss: 0.1279  iou: 0.5784  f1: 0.7292  prec: 0.9152  rec: 0.6121  spec: 0.9998
+  VAL    loss: 0.1300  iou: 0.5710  f1: 0.7241  prec: 0.9160  rec: 0.6027  spec: 0.9998
+  LR: 3.13e-05
+  ✓ History saved to: /app/data/trained-models/logs/history_2026_07_12-18_41_34.json
+  ✓ Config saved to: /app/data/trained-models/logs/config_2026_07_12-18_41_34.json
+Model saved to: /app/data/trained-models/model-2026_07_12-18_41_34.pt
+Loss curves saved to: /app/data/performance/loss_history.png
+Dataset sample saved to: /app/data/performance/dataset_sample.png
+Inference grid saved to: /app/data/performance/inference_result.png
+
+Object-level detection (tolerance=5px):
+  TP: 0  FP: 177  FN: 0
+  Precision: 0.0000  Recall: 0.0000  F1: 0.0000

@@ -5,10 +5,8 @@ import torch.nn.functional as F
 
 from .losses_interface import LossStrategy
 
-
-# ---------- Funciones auxiliares de Lovász ----------
 def lovasz_grad(gt_sorted):
-    """Computa el gradiente de la pérdida de Lovász para sorted labels."""
+    """Computes the Lovasz gradient for sorted labels."""
     p = len(gt_sorted)
     gts = gt_sorted.sum()
     intersection = gts - gt_sorted.float().cumsum(0)
@@ -20,7 +18,7 @@ def lovasz_grad(gt_sorted):
 
 
 def lovasz_hinge_flat(logits, labels):
-    """Pérdida Lovász-Hinge para predicciones aplanadas (logits y labels)."""
+    """Computes the Lovász-Hinge loss for flattened predictions (logits and labels)."""
     labels = labels.float()
     signs = 2. * labels - 1.
     errors = 1. - logits * signs
@@ -33,7 +31,7 @@ def lovasz_hinge_flat(logits, labels):
 
 def lovasz_hinge(logits, labels, per_image=True):
     """
-    logits: (B, H, W) o (B, 1, H, W) - salida del modelo SIN Sigmoid.
+    logits: (B, H, W) o (B, 1, H, W) - output of the model without Sigmoid (raw logits).
     labels: (B, H, W) - valores {0, 1}.
     """
     if logits.dim() == 4 and logits.shape[1] == 1:
@@ -49,7 +47,6 @@ def lovasz_hinge(logits, labels, per_image=True):
         return lovasz_hinge_flat(logits.flatten(), labels.flatten())
 
 
-# ---------- Wrapper para tu estrategia ----------
 class LovaszHingeLossModule(nn.Module):
     def __init__(self, per_image: bool = True):
         super().__init__()
@@ -63,8 +60,7 @@ class LovaszHingeLossModule(nn.Module):
 
 class LovaszHingeLoss(LossStrategy):
     """
-    Lovász-Hinge: optimiza directamente el IoU. La salida del modelo
-    debe ser logits crudos (sin Sigmoid).
+    Lovasz-Hinge: directly optimizes the IoU. The model output should be raw logits (without Sigmoid).
     """
 
     @property
@@ -75,8 +71,5 @@ class LovaszHingeLoss(LossStrategy):
         return LovaszHingeLossModule(per_image=True)
 
     def predictions_to_probability(self, preds: torch.Tensor) -> torch.Tensor:
-        # Sin esto, heredabas preds[:,0] = LOGITS crudos, y Trainer los
-        # umbralizaba en >0.5 como si fueran probabilidades (debería ser >0
-        # para logits, equivalente a sigmoid(logit)>0.5).
         logits = preds[:, 0] if preds.shape[1] == 1 else preds
         return torch.sigmoid(logits)

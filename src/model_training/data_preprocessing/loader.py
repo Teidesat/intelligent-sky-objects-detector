@@ -14,13 +14,21 @@ from .masking.masking_interface import MaskingStrategy
 
 
 class DatasetLoader:
-
+    """
+    Loader for datasets structured as directories containing subdirectories for each entry.
+    Each entry directory should contain:
+    - A FITS image file named "<entry_id>-image.fits"
+    - A FITS table file named "<entry_id>-axy.fits" containing detected objects
+    - An optional JSON file named "<entry_id>-annotations.json" for additional annotations
+    The loader applies a normalization strategy to the images and a masking strategy to generate segmentation masks.
+    The resulting DatasetEntry objects are cached as .npy files for faster subsequent loading.
+    """
     def __init__(self, normalization: NormalizationStrategy, masking: MaskingStrategy,
                  target_shape: tuple = (256, 256)):
         self.normalization = normalization
         self.masking       = masking
         self.target_shape  = target_shape
-        # Clave de caché: cambia automáticamente al cambiar masking strategy
+        # Cache key: automatically changes when masking strategy changes
         self._cache_key    = type(masking).__name__
 
     def load(self, dataset_path: Path) -> dict[str, DatasetEntry]:
@@ -35,7 +43,7 @@ class DatasetLoader:
             cache_file = cache_dir / f"{entry_id}_{self._cache_key}.npy"
             ann_path   = entry_path / f"{entry_id}-annotations.json"
 
-            # Usar caché si existe Y no está desactualizada respecto a las annotations
+            # Use cache if it exists and is not outdated relative to the annotations
             cache_valid = (
                 cache_file.exists() and
                 not (ann_path.exists() and

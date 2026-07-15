@@ -8,10 +8,9 @@ from .losses_interface import LossStrategy
 
 class CrossEntropyLoss(LossStrategy):
     """
-    IMPORTANTE: sin class_weights, con tu desbalance de píxeles, tiende a
-    converger con muchos falsos positivos porque el promedio de la loss
-    lo domina el fondo (fácil de acertar) y no penaliza lo suficiente
-    cada falso positivo individual.
+    Tends to converge with many false positives due to pixel imbalance, 
+    as the average loss is dominated by the background (easy to predict) 
+    and does not sufficiently penalize each individual false positive.
     """
 
     def __init__(self, num_classes: int = 2, star_class_index: int = 1,

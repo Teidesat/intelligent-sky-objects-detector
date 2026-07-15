@@ -3,6 +3,11 @@ import numpy as np
 from .entry import DatasetEntry
 
 class FrigatePairLoader:
+    """
+    Loader for Frigate-generated image-mask pairs. 
+    It loads .npy files containing images and their corresponding segmentation masks, 
+    and returns a dictionary of DatasetEntry objects.
+    """
     def __init__(self, target_shape=(256, 256)):
         self.target_shape = target_shape
 
@@ -19,7 +24,7 @@ class FrigatePairLoader:
                 entry_id=entry_id,
                 nn_input_image=img,
                 segmentation_mask=mask,
-                filtered_objects=[]  # no .axy
+                filtered_objects=[]
             )
         print(f"Loaded {len(dataset)} Frigate pairs")
         return dataset

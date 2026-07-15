@@ -87,7 +87,7 @@ class Trainer:
         criterion = self.loss_strategy.get_loss()
         if isinstance(criterion, nn.Module):
             criterion = criterion.to(self.device)
-        # 1e-4 para lovasz y tversky, 1e-3 para BCE y Dice. 1e-3 es el default de Adam.
+        # 1e-4 for lovasz y tversky, 1e-3 for BCE and Dice. 1e-3 is Adam default.
         optimizer = optim.Adam(self.model.parameters(), lr=1e-3, weight_decay=1e-4)
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(
             optimizer, mode='max', factor=0.5, patience=10, min_lr=1e-6 # 1e-6
@@ -105,7 +105,6 @@ class Trainer:
             epoch_end_time = time.time()
             epoch_duration = epoch_end_time - epoch_start_time
     
-            # Formatear el tiempo en minutos y segundos
             minutes = int(epoch_duration // 60)
             seconds = epoch_duration % 60
             if minutes > 0:
@@ -181,7 +180,7 @@ class Trainer:
                 if training:
                     optimizer.zero_grad()
 
-                preds = self.model(imgs)  # (B, C, H, W) — C según loss_strategy
+                preds = self.model(imgs)  # (B, C, H, W) — C depends on loss_strategy
                 preds_for_loss   = self.loss_strategy.format_predictions(preds)
                 targets_for_loss = self.loss_strategy.format_targets(masks)
                 loss = criterion(preds_for_loss, targets_for_loss)
@@ -191,7 +190,7 @@ class Trainer:
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
                     optimizer.step()
 
-                probs = self.loss_strategy.predictions_to_probability(preds.detach())  # (B,H,W) en [0,1]
+                probs = self.loss_strategy.predictions_to_probability(preds.detach()) 
                 metrics = self._compute_metrics(probs, masks)
                 total_loss        += loss.item()
                 total_acc         += metrics["acc"]
@@ -272,22 +271,18 @@ class Trainer:
         return datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
     
     def _save_experiment_logs(self, history: History, config: dict):
-        """Guarda el historial de métricas y la configuración en JSON."""
-        # Crear carpeta de logs si no existe
+        """Save experiment logs and metrics."""
         log_dir = self.output_dir / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         
-        # Usar el timestamp del checkpoint para nombrar los archivos
         timestamp = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
         
-        # Guardar historial (métricas por época)
         history_path = log_dir / f"history_{timestamp}.json"
         with open(history_path, "w") as f:
             json.dump(history.history, f, indent=2)
         print(f"  ✓ History saved to: {history_path}")
         
-        # Guardar configuración del experimento
         config_path = log_dir / f"config_{timestamp}.json"
         with open(config_path, "w") as f:
-            json.dump(config, f, indent=2, default=str)  # default=str para manejar objetos no serializables
+            json.dump(config, f, indent=2, default=str) 
         print(f"  ✓ Config saved to: {config_path}")

@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import torch.nn as nn
 import random
 
 def dataset_to_tensors(dataset: dict) -> tuple[torch.Tensor, torch.Tensor]:
@@ -37,6 +38,9 @@ def limit_empty_images(dataset: dict, keep_fraction: float = 0.3, seed: int = 42
     return {**with_stars, **kept_empty}
 
 def print_experiment_config(**strategies):
+    """
+    Prints the configuration of the experiment, including the names and parameters of the provided strategies.
+    """
     print("\n" + "="*50)
     print("EXPERIMENT CONFIGURATION")
     print("="*50)
@@ -71,7 +75,6 @@ def _extract_params(strategy) -> dict:
     for k, v in vars(strategy).items():
         if k.startswith('__') or callable(v):
             continue
-        import torch.nn as nn
         if isinstance(v, nn.Module):
             continue
         params[k.lstrip('_')] = v

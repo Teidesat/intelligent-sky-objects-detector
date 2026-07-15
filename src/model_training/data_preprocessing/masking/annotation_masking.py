@@ -6,10 +6,10 @@ from .masking_interface import MaskingStrategy
 
 class AnnotationMasking(MaskingStrategy):
     """
-    Ground truth basado en objetos verificados contra catálogos astronómicos
-    reales (HD, Tycho-2, 2MASS, USNO-B) devueltos por la API de astrometry.net.
-    Ignora completamente el .axy (ruidoso).
-    Si no hay annotations para un job, devuelve máscara vacía.
+    Ground truth based on objects verified against real astronomical catalogs 
+    (HD, Tycho-2, 2MASS, USNO-B) returned by the astrometry.net API.
+    Completely ignores the .axy (noisy).
+    If there are no annotations for a job, returns an empty mask.
     """
 
     def __init__(self, radius: int = 4, border_margin: int = 5):

@@ -54,9 +54,8 @@ from model_training.auxiliary_functions import dataset_to_tensors
 from model_training.auxiliary_functions import limit_empty_images
 from model_training.auxiliary_functions import print_experiment_config
 
-# ---------- NUEVO: Normalización identidad para Frigate (no hace nada) ----------
 class IdentityNormalization(NormalizationStrategy):
-    """Normalización que devuelve la imagen tal cual. Útil para datasets ya normalizados."""
+    """Normalization strategy that returns the input image unchanged. Used for Frigate datasets where normalization is not needed."""
     def normalize(self, image):
         return image
 
@@ -153,18 +152,16 @@ def main():
     # model_strategy        = UNet3Levels()
     # postprocessing        = MorphologicalClosing(kernel_size=7, min_area=4.0)
 
-    # NUEVO: Detectar si es Frigate (por archivos .npy)
+    # Detect if the dataset is in Frigate format (contains .npy files) or standard FITS format. This allows for different loading and preprocessing strategies.
     is_frigate = any(p.suffix == ".npy" for p in args.dataset.iterdir())
 
     # Load dataset, preparing for frigate-based model 
     if is_frigate:
-        # Para Frigate usamos el loader específico y no aplicamos normalización ni masking (ya vienen en los .npy)
         loader = FrigatePairLoader(target_shape=TARGET_SHAPE)
         print("Loading Frigate dataset...")
         dataset = loader.load(args.dataset)
-        # Sobrescribimos normalization y masking para Frigate
         normalization = IdentityNormalization()
-        masking = None  # no se usa
+        masking = None
     else:
         loader = DatasetLoader(normalization=normalization, masking=masking, target_shape=TARGET_SHAPE)
         print("Loading dataset...")
@@ -177,6 +174,7 @@ def main():
         Augmentation  = augmentation_strategy,
         Masking       = masking
     )
+
     # Split
     items = list(dataset.items())
     train_items, rest      = train_test_split(items, train_size=0.7, shuffle=True, random_state=42)
@@ -251,12 +249,6 @@ def main():
         epochs=args.epochs,
     )
     trainer.build()
-    # If the model has a final activation layer, replace it with Identity to avoid double activation, needed for some combinations of loss functions. 
-    # This is a workaround for the fact that some loss functions expect raw logits, while others expect probabilities.
-    # if hasattr(trainer.model, 'final_activation'):
-    #     import torch.nn as nn
-    #     trainer.model.final_activation = nn.Identity()
-    #     print("¡Modificación exitosa! final_activation reemplazada por nn.Identity().")
     history = trainer.train(train_images, train_masks, val_images, val_masks)
     trainer.save()
 

@@ -4,6 +4,9 @@ from .u_net_base_interface import UNetBase, ConvBlock, EncoderBlock, DecoderBloc
 
 
 class UNet3LevelsModule(nn.Module):
+    """
+    U-Net with 3 levels. Less capacity than UNet4Levels but a less strong bottleneck.
+    """
     def __init__(self, in_channels: int, num_classes: int, apply_activation: bool = True, prior_prob: float = 0.04):
         super().__init__()
         self.enc1 = EncoderBlock(in_channels, 64)
@@ -18,13 +21,14 @@ class UNet3LevelsModule(nn.Module):
         self._init_output_bias(prior_prob)
 
     def _init_output_bias(self, prior_prob: float):
-        """Sin esto, el bias arranca en 0 -> Sigmoid(0)=0.5, muy lejos del
-        ~4.5% real. El gradiente lo empuja tan fuerte hacia muy negativo
-        para compensar el 95.5% de fondo que satura el Sigmoid y el
-        gradiente se desvanece -- la red queda congelada prediciendo 0
-        en todas partes. Esto pasa con cualquier loss."""
+        """
+        Initializes the bias of the output convolution layer based on the prior probability. 
+        This is important to prevent the model from being biased towards predicting the background class, 
+        especially when the foreground class is rare.
+        Important to note that this initialization is only applied when the number of output channels is 1 (binary segmentation).
+        """
         if self.output_conv.out_channels != 1:
-            return  # pensado para cabeza Sigmoid de 1 canal
+            return  
         bias_value = -math.log((1 - prior_prob) / prior_prob)
         nn.init.constant_(self.output_conv.bias, bias_value)
 
@@ -40,6 +44,9 @@ class UNet3LevelsModule(nn.Module):
 
 
 class UNet3Levels(UNetBase):
+    """
+    U-Net with 3 levels. Less capacity than UNet4Levels but a less strong bottleneck.
+    """
     def __init__(self, prior_prob: float = 0.04):
         self.prior_prob = prior_prob
 

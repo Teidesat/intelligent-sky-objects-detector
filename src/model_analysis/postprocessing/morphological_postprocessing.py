@@ -26,7 +26,6 @@ class MorphologicalClosing(PostprocessingStrategy):
         for contour in contours:
             if cv.contourArea(contour) < self.min_area:
                 continue
-            # Centroide por distancia euclídea, media artimética
             M = cv.moments(contour)
             if M['m00'] == 0:
                 continue

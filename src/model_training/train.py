@@ -6,6 +6,45 @@ To swap any strategy, change only the instantiation in the Strategies section:
     normalization  = SimpleMaxNormalization()
     loss           = CrossEntropyLoss()
     model_strategy = UNet4Levels()
+
+
+================================================================================
+⚠️  AVISO — PIPELINE DE FRIGATE EN ESTADO EXPERIMENTAL / NO RECOMENDADO
+================================================================================
+
+Este módulo forma parte del pipeline de preprocesado de Frigate y actualmente
+NO funciona de forma fiable. Se mantiene en el repositorio como punto de
+partida, pero requiere más investigación antes de poder usarse para entrenar
+o evaluar modelos con garantías.
+
+Problema conocido:
+    La generación de máscaras (frame-differencing + threshold) no está
+    respondiendo realmente al contenido de la imagen, sino a una
+    codificación que se mantiene prácticamente constante entre frames.
+    Es decir, el offset/escala usado al normalizar los datos crudos
+    (actualmente `(data - 32768) / 32768`) no refleja el rango dinámico
+    real de cada frame, por lo que la diferencia entre frames vecinos
+    capta en buena medida un patrón de codificación fijo en lugar de
+    variaciones reales de la escena (estrellas, streaks de satélites, etc.).
+    Esto contamina las máscaras generadas y, por extensión, cualquier
+    modelo entrenado con ellas.
+
+Recomendación:
+    NO usar este pipeline para entrenar o evaluar modelos por el momento.
+    Antes de retomarlo, se recomienda:
+      1. Inspeccionar visualmente el rango real de valores de varios FITS
+         de Frigate (min/max/histograma) en lugar de asumir un offset fijo
+         de 16 bits con signo.
+      2. Verificar si el offset/escala de normalización debe calcularse
+         por frame (o por sensor/sesión) en vez de usar una constante
+         global.
+      3. Confirmar, con inspección visual de las máscaras resultantes,
+         que el patrón detectado corresponde a objetos reales en
+         movimiento y no a artefactos de codificación.
+
+El pipeline de Astrometry.net no se ve afectado por este problema y sigue
+siendo la vía principal y fiable del proyecto.
+================================================================================
 """
 
 import sys

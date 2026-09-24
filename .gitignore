@@ -3,3 +3,10 @@
 
 dataset/
 trained-models/
+
+__pycache__/
+*.pyc
+.env
+data/performance/eval*/
+data/performance/gaia_cache
+data/frigate*

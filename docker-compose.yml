@@ -1,0 +1,230 @@
+services:
+  download:
+    build: .
+    image: sky-detector
+    command: python src/dataset_downloader/dataset_downloader.py
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    environment:
+      - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+
+  train:
+    build: .
+    image: sky-detector
+    command: >
+      sh -c "python -m src.model_training.train 
+      --dataset /app/data/dataset 
+      --output /app/data/trained-models 
+      --performance /app/data/performance 
+      --epochs 150 2>&1 | tee /app/data/logs/train_$(date +%Y%m%d_%H%M%S).log"
+    user: root
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      - D:/TeideSAT/frigate/frigate:/app/frigate
+    runtime: nvidia
+    environment:
+      - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        limits: 
+          memory: 16G
+        reservations:
+          memory: 16G
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  preprocess_frigate:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_training.data_preprocessing.frigate_auxiliar
+      --input /app/frigate/raw
+      --output /app/data/frigate_pairs
+      --max 1200
+      --size 256
+    user: root
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      - D:/TeideSAT/frigate/frigate:/app/frigate
+    environment:
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        limits: 
+          memory: 16G
+        reservations:
+          memory: 16G
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  train_frigate:
+    build: .
+    image: sky-detector
+    command: >
+      sh -c "python -m src.model_training.train 
+      --dataset /app/data/frigate_pairs
+      --output /app/data/trained-models 
+      --performance /app/data/performance 
+      --epochs 100 
+      --batch-size 4 2>&1 | tee /app/data/logs/train_frigate_$(date +%Y%m%d_%H%M%S).log"
+    user: root
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      - D:/TeideSAT/frigate/frigate:/app/frigate
+    runtime: nvidia
+    environment:
+      - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        limits: 
+          memory: 16G
+        reservations:
+          memory: 16G
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  eval_frigate:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_applications.run_evaluation
+      --model /app/data/trained-models/model_frigate.pt
+      --dataset /app/data/frigate_pairs
+      --output /app/data/performance/eval_frigate/
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      - D:/TeideSAT/frigate/frigate:/app/frigate
+    environment:
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  infer_frigate:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_applications.run_inference
+      --model /app/data/trained-models/model_frigate.pt
+      --image /app/frigate/raw/Capture_00001.fits
+      --output /app/data/performance/infer_frigate_result.png
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      - D:/TeideSAT/frigate/frigate:/app/frigate
+    environment:
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  infer:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_applications.run_inference
+      --model /app/data/trained-models/model-2026_06_22-16_32_45.pt   
+      --image /app/data/dataset/1544485/test_satelite_saturado.fits
+      --output /app/data/performance/infer_result_artioriginal.png
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    environment:
+      - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  eval:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_applications.run_evaluation
+      --model /app/data/trained-models/model-2026_06_22-16_32_45.pt   
+      --dataset /app/data/dataset/
+      --output /app/data/performance/eval-2026_06_22-19_17_45/
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    environment:
+      - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  visibility:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.model_applications.run_satellite_visibility
+      --model /app/data/trained-models/model-2026_06_22-16_32_45.pt  
+      --dataset /app/data/dataset/
+      --output /app/data/performance/
+      --led-lumens 8000
+      --num-leds 4
+      --sat-mag 4.2
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    environment:
+      - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  test_infer:
+    build: .
+    image: sky-detector
+    command: >
+      python -m src.script
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    environment:
+      - ASTROMETRY_API_KEY=${ASTROMETRY_API_KEY}
+      - PYTHONPATH=/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

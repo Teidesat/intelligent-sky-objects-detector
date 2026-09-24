@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/app/src/model_training/train.py", line 257, in <module>
+    main()
+  File "/app/src/model_training/train.py", line 151, in main
+    loader = FrigatePairLoader(target_shape=TARGET_SHAPE)
+NameError: name 'FrigatePairLoader' is not defined
